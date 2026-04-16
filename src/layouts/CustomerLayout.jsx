@@ -1,5 +1,11 @@
 import { Link, useNavigate, useLocation } from "react-router-dom";
-import { useAuthStore, useCartStore, useAppStore, useTrackingStore, useWishlistStore } from "@/store";
+import {
+  useAuthStore,
+  useCartStore,
+  useAppStore,
+  useTrackingStore,
+  useWishlistStore,
+} from "@/store";
 import clsx from "clsx";
 
 const CustomerNav = () => {
@@ -14,14 +20,30 @@ const CustomerNav = () => {
   const cartCount = getItemCount();
 
   const navLinks = [
-    { to: "/", label: "Menu", icon: "🍔" },
+    { to: "/", label: "Restaurants", icon: "🏪" },
+    { to: "/menu", label: "Browse Menu", icon: "🍔" },
     { to: "/orders", label: "My Orders", icon: "📦" },
-    { to: "/wishlist", label: "Favorites", icon: "❤️", badge: wishlistItems.length },
+    {
+      to: "/wishlist",
+      label: "Favorites",
+      icon: "❤️",
+      badge: wishlistItems.length,
+    },
   ];
 
   const handleLogout = () => {
     logout();
     navigate("/login");
+  };
+
+  const isActiveLink = (to) => {
+    if (to === "/") {
+      return (
+        location.pathname === "/" ||
+        location.pathname.startsWith("/restaurant/")
+      );
+    }
+    return location.pathname === to;
   };
 
   return (
@@ -30,7 +52,11 @@ const CustomerNav = () => {
         {/* Logo */}
         <Link to="/" className="flex items-center gap-2.5 group">
           <div className="w-9 h-9 bg-white dark:bg-gray-900 rounded-xl flex items-center justify-center shadow-md group-hover:shadow-glow transition-shadow overflow-hidden">
-            <img src="/src/assets/img/logo/logo.png" alt="Logo" className="w-6 h-6 object-contain" />
+            <img
+              src="/src/assets/img/logo/logo.png"
+              alt="Logo"
+              className="w-6 h-6 object-contain"
+            />
           </div>
           <span className="font-display font-bold text-xl text-gradient">
             QuickBite
@@ -45,9 +71,9 @@ const CustomerNav = () => {
               to={link.to}
               className={clsx(
                 "relative flex items-center gap-1.5 px-4 py-2 rounded-lg font-medium text-sm transition-all duration-200",
-                location.pathname === link.to
+                isActiveLink(link.to)
                   ? "bg-primary text-white"
-                  : "text-[#6b4040] dark:text-[#c9a97a] hover:bg-[#E5D0AC]/50 dark:hover:bg-[#3d1a1a]/50"
+                  : "text-[#6b4040] dark:text-[#c9a97a] hover:bg-[#E5D0AC]/50 dark:hover:bg-[#3d1a1a]/50",
               )}
             >
               <span>{link.icon}</span>
@@ -96,7 +122,10 @@ const CustomerNav = () => {
 
           {/* User menu */}
           <div className="flex items-center gap-2 pl-2 border-l border-[#E5D0AC] dark:border-[#3d1a1a]">
-            <Link to="/profile" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
+            <Link
+              to="/profile"
+              className="flex items-center gap-2 hover:opacity-80 transition-opacity"
+            >
               <div className="w-8 h-8 bg-gradient-brand rounded-full flex items-center justify-center text-white text-sm font-bold shadow-sm">
                 {user?.name?.[0] || "U"}
               </div>
@@ -122,9 +151,9 @@ const CustomerNav = () => {
             to={link.to}
             className={clsx(
               "relative flex items-center gap-1 px-3 py-1.5 rounded-lg text-sm font-medium transition-all flex-1 justify-center",
-              location.pathname === link.to
+              isActiveLink(link.to)
                 ? "bg-primary text-white"
-                : "text-[#6b4040] dark:text-[#c9a97a] hover:bg-[#E5D0AC]/50 dark:hover:bg-[#3d1a1a]/50"
+                : "text-[#6b4040] dark:text-[#c9a97a] hover:bg-[#E5D0AC]/50 dark:hover:bg-[#3d1a1a]/50",
             )}
           >
             <span>{link.icon}</span>

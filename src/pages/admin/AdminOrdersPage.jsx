@@ -19,8 +19,7 @@ const AdminOrdersPage = () => {
         o.id.toLowerCase().includes(search.toLowerCase()) ||
         o.customerName?.toLowerCase().includes(search.toLowerCase()) ||
         o.customerAddress?.toLowerCase().includes(search.toLowerCase());
-      const matchStatus =
-        statusFilter === "all" || o.status === statusFilter;
+      const matchStatus = statusFilter === "all" || o.status === statusFilter;
       return matchSearch && matchStatus;
     })
     .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
@@ -41,7 +40,9 @@ const AdminOrdersPage = () => {
         <div className="flex flex-col sm:flex-row gap-3">
           {/* Search */}
           <div className="relative flex-1">
-            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm">🔍</span>
+            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm">
+              🔍
+            </span>
             <input
               type="text"
               placeholder="Search by order ID, customer..."
@@ -59,7 +60,14 @@ const AdminOrdersPage = () => {
             options={ALL_STATUSES.map((s) => ({
               value: s,
               label: s === "all" ? "All Statuses" : STATUS_LABELS[s],
-              icon: s === "all" ? "📋" : (s === ORDER_STATUS.DELIVERED ? "✅" : (s === ORDER_STATUS.CANCELLED ? "❌" : "⏳"))
+              icon:
+                s === "all"
+                  ? "📋"
+                  : s === ORDER_STATUS.DELIVERED
+                  ? "✅"
+                  : s === ORDER_STATUS.CANCELLED
+                  ? "❌"
+                  : "⏳",
             }))}
           />
         </div>
@@ -94,6 +102,7 @@ const AdminOrdersPage = () => {
                 <th>Total</th>
                 <th>Status</th>
                 <th>Driver</th>
+                <th>Assignment</th>
                 <th>Date</th>
                 <th>Actions</th>
               </tr>
@@ -115,7 +124,9 @@ const AdminOrdersPage = () => {
                     </div>
                   </td>
                   <td>
-                    <span className="text-sm">{order.items?.length || 0} items</span>
+                    <span className="text-sm">
+                      {order.items?.length || 0} items
+                    </span>
                   </td>
                   <td>
                     <span className="font-bold text-primary">
@@ -129,7 +140,35 @@ const AdminOrdersPage = () => {
                     {order.driver ? (
                       <span className="text-sm">{order.driver.name}</span>
                     ) : (
-                      <span className="text-xs text-[#9e7272] italic">Unassigned</span>
+                      <span className="text-xs text-[#9e7272] italic">
+                        Unassigned
+                      </span>
+                    )}
+                  </td>
+                  <td>
+                    {order.driverId ? (
+                      <div className="flex flex-col gap-1">
+                        <span
+                          className={`text-[10px] px-2 py-0.5 rounded-full font-semibold w-fit ${
+                            order.autoAssigned
+                              ? "bg-emerald-100 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-300"
+                              : "bg-amber-100 dark:bg-amber-900/20 text-amber-700 dark:text-amber-300"
+                          }`}
+                        >
+                          {order.autoAssigned
+                            ? "Auto Assigned"
+                            : "Manual Override"}
+                        </span>
+                        {typeof order.assignmentScore === "number" && (
+                          <span className="text-[11px] text-[#6b4040] dark:text-[#c9a97a]">
+                            Score: {order.assignmentScore.toFixed(3)}
+                          </span>
+                        )}
+                      </div>
+                    ) : (
+                      <span className="text-xs text-[#9e7272] italic">
+                        Searching
+                      </span>
                     )}
                   </td>
                   <td>

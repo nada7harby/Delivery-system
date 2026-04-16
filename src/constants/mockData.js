@@ -3,7 +3,8 @@ export const MENU_ITEMS = [
   {
     id: "p1",
     name: "Classic Cheese Burger",
-    description: "Flame-grilled beef patty, melted cheddar, crisp lettuce, and our signature burger sauce.",
+    description:
+      "Flame-grilled beef patty, melted cheddar, crisp lettuce, and our signature burger sauce.",
     price: 12.99,
     category: "Burgers",
     image: "/src/assets/images/dish-1.png",
@@ -15,7 +16,8 @@ export const MENU_ITEMS = [
   {
     id: "p2",
     name: "Margherita Gold Pizza",
-    description: "San Marzano tomatoes, fresh buffalo mozzarella, basil, and a drizzle of extra virgin olive oil.",
+    description:
+      "San Marzano tomatoes, fresh buffalo mozzarella, basil, and a drizzle of extra virgin olive oil.",
     price: 16.99,
     category: "Pizza",
     image: "/src/assets/images/dish-2.png", // Often pizza or round dish
@@ -27,7 +29,8 @@ export const MENU_ITEMS = [
   {
     id: "p3",
     name: "Zesty Caesar Salad",
-    description: "Crisp romaine hearts, garlic croutons, white anchovies, and creamy parmesan dressing.",
+    description:
+      "Crisp romaine hearts, garlic croutons, white anchovies, and creamy parmesan dressing.",
     price: 9.99,
     category: "Salads",
     image: "/src/assets/images/dish-3.png",
@@ -39,7 +42,8 @@ export const MENU_ITEMS = [
   {
     id: "p4",
     name: "Glazed BBQ Wings",
-    description: "Slow-roasted jumbo wings tossed in our house-made hickory smoked BBQ sauce.",
+    description:
+      "Slow-roasted jumbo wings tossed in our house-made hickory smoked BBQ sauce.",
     price: 14.99,
     category: "Starters",
     image: "/src/assets/images/dish-4.png",
@@ -51,7 +55,8 @@ export const MENU_ITEMS = [
   {
     id: "p5",
     name: "Traditional Carbonara",
-    description: "Spaghetti with crispy pancetta, black pepper, and egg yolk sauce (no cream!).",
+    description:
+      "Spaghetti with crispy pancetta, black pepper, and egg yolk sauce (no cream!).",
     price: 13.99,
     category: "Pasta",
     image: "/src/assets/images/dish-5.png",
@@ -63,7 +68,8 @@ export const MENU_ITEMS = [
   {
     id: "p6",
     name: "Golden Fish & Chips",
-    description: "Atlantic cod in a crispy beer batter with hand-cut fries and minted peas.",
+    description:
+      "Atlantic cod in a crispy beer batter with hand-cut fries and minted peas.",
     price: 15.99,
     category: "Seafood",
     image: "/src/assets/images/dish-6.png",
@@ -75,7 +81,8 @@ export const MENU_ITEMS = [
   {
     id: "p7",
     name: "Mediterranean Wrap",
-    description: "Grilled chicken, hummus, cucumber salad, and feta cheese in a whole wheat wrap.",
+    description:
+      "Grilled chicken, hummus, cucumber salad, and feta cheese in a whole wheat wrap.",
     price: 10.99,
     category: "Wraps",
     image: "/src/assets/images/menu-7.jpg",
@@ -87,7 +94,8 @@ export const MENU_ITEMS = [
   {
     id: "p8",
     name: "Molten Lava Cake",
-    description: "Warm chocolate gateau with a liquid center, served with Madagascan vanilla ice cream.",
+    description:
+      "Warm chocolate gateau with a liquid center, served with Madagascan vanilla ice cream.",
     price: 7.99,
     category: "Desserts",
     image: "/src/assets/images/menu-8.jpg",
@@ -99,7 +107,8 @@ export const MENU_ITEMS = [
   {
     id: "p9",
     name: "Tonkotsu Ramen",
-    description: "12-hour pork bone broth, thin noodles, chashu pork, and jammy soft boiled egg.",
+    description:
+      "12-hour pork bone broth, thin noodles, chashu pork, and jammy soft boiled egg.",
     price: 14.99,
     category: "Asian",
     image: "/src/assets/images/menu-9.jpg",
@@ -111,7 +120,8 @@ export const MENU_ITEMS = [
   {
     id: "p10",
     name: "Double Decker Burger",
-    description: "Two 4oz premium beef patties, dual cheese, pickles, and crispy fried onions.",
+    description:
+      "Two 4oz premium beef patties, dual cheese, pickles, and crispy fried onions.",
     price: 15.99,
     category: "Burgers",
     image: "/src/assets/images/menu-1.jpg",
@@ -123,7 +133,8 @@ export const MENU_ITEMS = [
   {
     id: "p11",
     name: "Pepperoni Passion",
-    description: "Loaded with double pepperoni and extra spicy Italian sausage.",
+    description:
+      "Loaded with double pepperoni and extra spicy Italian sausage.",
     price: 18.99,
     category: "Pizza",
     image: "/src/assets/images/menu-2.jpg",
@@ -135,7 +146,8 @@ export const MENU_ITEMS = [
   {
     id: "p12",
     name: "Berry Blast Smoothie",
-    description: "A refreshing blend of blueberries, raspberries, and strawberries with almond milk.",
+    description:
+      "A refreshing blend of blueberries, raspberries, and strawberries with almond milk.",
     price: 6.99,
     category: "Drinks",
     image: "/src/assets/images/home-img-1.png",
@@ -147,8 +159,9 @@ export const MENU_ITEMS = [
   {
     id: "p13",
     name: "Truffle Fries",
-    description: "Crispy fries tossed in black truffle oil and toasted parmesan herbs.",
-    price: 8.50,
+    description:
+      "Crispy fries tossed in black truffle oil and toasted parmesan herbs.",
+    price: 8.5,
     category: "Starters",
     image: "/src/assets/images/menu-4.jpg",
     rating: 4.6,
@@ -159,8 +172,9 @@ export const MENU_ITEMS = [
   {
     id: "p14",
     name: "Chicken Enchiladas",
-    description: "Corn tortillas stuffed with shredded chicken, topped with spicy red sauce and sour cream.",
-    price: 15.50,
+    description:
+      "Corn tortillas stuffed with shredded chicken, topped with spicy red sauce and sour cream.",
+    price: 15.5,
     category: "Mexican",
     image: "/src/assets/images/menu-3.jpg",
     rating: 4.5,
@@ -171,7 +185,8 @@ export const MENU_ITEMS = [
   {
     id: "p15",
     name: "Grilled Steak Salad",
-    description: "Skirt steak with mixed greens, blue cheese, walnuts, and balsamic reduction.",
+    description:
+      "Skirt steak with mixed greens, blue cheese, walnuts, and balsamic reduction.",
     price: 19.99,
     category: "Salads",
     image: "/src/assets/images/dish-4.png",
@@ -179,7 +194,7 @@ export const MENU_ITEMS = [
     prepTime: "15 min",
     popular: true,
     calories: 540,
-  }
+  },
 ];
 
 export const CATEGORIES = [
@@ -207,9 +222,12 @@ export const MOCK_DRIVERS = [
     licensePlate: "DEL-2024",
     rating: 4.9,
     deliveries: 1250,
-    status: "available",
+    status: "online",
+    availability: "free",
+    activeOrdersCount: 0,
     lat: 40.71,
     lng: -74.01,
+    currentLocation: { lat: 40.71, lng: -74.01 },
   },
   {
     id: "d2",
@@ -219,9 +237,12 @@ export const MOCK_DRIVERS = [
     licensePlate: "BKE-202",
     rating: 4.6,
     deliveries: 218,
-    status: "available",
+    status: "online",
+    availability: "free",
+    activeOrdersCount: 0,
     lat: 40.72,
     lng: -74.0,
+    currentLocation: { lat: 40.72, lng: -74.0 },
   },
   {
     id: "d3",
@@ -231,8 +252,11 @@ export const MOCK_DRIVERS = [
     licensePlate: "CAR-303",
     rating: 4.9,
     deliveries: 510,
-    status: "busy",
+    status: "online",
+    availability: "busy",
+    activeOrdersCount: 1,
     lat: 40.73,
     lng: -73.99,
+    currentLocation: { lat: 40.73, lng: -73.99 },
   },
 ];

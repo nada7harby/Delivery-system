@@ -1,17 +1,32 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useCartStore, useOrderStore, useAuthStore, useAppStore, useTrackingStore } from "@/store";
+import {
+  useCartStore,
+  useOrderStore,
+  useAuthStore,
+  useAppStore,
+  useTrackingStore,
+  useMarketplaceStore,
+} from "@/store";
 import { CustomerLayout } from "@/layouts";
 import { Button, Card, Input } from "@/components";
-import { ORDER_STATUS } from "@/constants";
-
 const CheckoutPage = () => {
   const navigate = useNavigate();
-  const { items, getTotal, getDeliveryFee, getTax, getGrandTotal, clearCart } = useCartStore();
+  const {
+    items,
+    getTotal,
+    getDeliveryFee,
+    getTax,
+    getGrandTotal,
+    clearCart,
+    restaurantId,
+  } = useCartStore();
+  const { getRestaurantById } = useMarketplaceStore();
   const { createOrder } = useOrderStore();
   const { user } = useAuthStore();
   const { addToast } = useAppStore();
   const { addNotification } = useTrackingStore();
+  const restaurant = getRestaurantById(restaurantId);
 
   const [form, setForm] = useState({
     address: user?.address || "",
@@ -23,7 +38,11 @@ const CheckoutPage = () => {
 
   const handlePlaceOrder = async () => {
     if (!form.address.trim()) {
-      addToast({ type: "error", title: "Address required", message: "Please enter a delivery address" });
+      addToast({
+        type: "error",
+        title: "Address required",
+        message: "Please enter a delivery address",
+      });
       return;
     }
 
@@ -35,6 +54,14 @@ const CheckoutPage = () => {
       customerName: user?.name,
       customerPhone: form.phone,
       customerAddress: form.address,
+      restaurantId,
+      restaurantName: restaurant?.name,
+      pickupLocation: { lat: 40.7128, lng: -74.006, name: "Restaurant HQ" },
+      deliveryLocation: {
+        lat: 40.7228 + (Math.random() - 0.5) * 0.02,
+        lng: -74.016 + (Math.random() - 0.5) * 0.02,
+        address: form.address,
+      },
       notes: form.notes,
       paymentMethod: form.paymentMethod,
       items: items.map((i) => ({
@@ -57,10 +84,18 @@ const CheckoutPage = () => {
       orderId: order.id,
     });
 
+    addNotification({
+      type: "order",
+      title: "Searching for driver...",
+      message:
+        "We are auto-assigning the best available driver for your order.",
+      orderId: order.id,
+    });
+
     addToast({
       type: "success",
       title: "Order placed! 🎉",
-      message: `Order #${order.id} is being prepared`,
+      message: `Order #${order.id} is searching for a driver`,
       duration: 5000,
     });
 
@@ -81,6 +116,14 @@ const CheckoutPage = () => {
           <h1 className="font-display text-3xl font-bold text-[#1a0a0a] dark:text-[#f8f8f8] mb-6">
             Checkout 🛍️
           </h1>
+          {restaurant && (
+            <p className="mb-5 text-sm text-[#6b4040] dark:text-[#c9a97a]">
+              You are checking out items from{" "}
+              <span className="font-semibold text-[#1a0a0a] dark:text-[#f8f8f8]">
+                {restaurant.name}
+              </span>
+            </p>
+          )}
 
           <div className="grid lg:grid-cols-3 gap-6">
             {/* Form */}
@@ -95,7 +138,9 @@ const CheckoutPage = () => {
                     label="Delivery Address"
                     placeholder="123 Main St, City, State"
                     value={form.address}
-                    onChange={(e) => setForm({ ...form, address: e.target.value })}
+                    onChange={(e) =>
+                      setForm({ ...form, address: e.target.value })
+                    }
                     icon="🏠"
                     required
                   />
@@ -104,14 +149,18 @@ const CheckoutPage = () => {
                     type="tel"
                     placeholder="+1 (555) 000-0000"
                     value={form.phone}
-                    onChange={(e) => setForm({ ...form, phone: e.target.value })}
+                    onChange={(e) =>
+                      setForm({ ...form, phone: e.target.value })
+                    }
                     icon="📱"
                   />
                   <div>
                     <label className="input-label">Special Instructions</label>
                     <textarea
                       value={form.notes}
-                      onChange={(e) => setForm({ ...form, notes: e.target.value })}
+                      onChange={(e) =>
+                        setForm({ ...form, notes: e.target.value })
+                      }
                       placeholder="E.g., no onions, extra sauce, leave at door..."
                       rows={3}
                       className="input resize-none"
@@ -133,7 +182,9 @@ const CheckoutPage = () => {
                   ].map((method) => (
                     <button
                       key={method.value}
-                      onClick={() => setForm({ ...form, paymentMethod: method.value })}
+                      onClick={() =>
+                        setForm({ ...form, paymentMethod: method.value })
+                      }
                       className={`flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all ${
                         form.paymentMethod === method.value
                           ? "border-primary bg-primary/10"
@@ -174,9 +225,16 @@ const CheckoutPage = () => {
 
                 <div className="space-y-2 mb-4 max-h-48 overflow-y-auto">
                   {items.map((item) => (
-                    <div key={item.id} className="flex items-center gap-2.5 text-sm">
+                    <div
+                      key={item.id}
+                      className="flex items-center gap-2.5 text-sm"
+                    >
                       <div className="w-10 h-10 rounded-lg overflow-hidden bg-gray-100 flex-shrink-0 border border-gray-100">
-                        <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
+                        <img
+                          src={item.image}
+                          alt={item.name}
+                          className="w-full h-full object-cover"
+                        />
                       </div>
                       <div className="flex-1 min-w-0">
                         <p className="font-medium text-[#1a0a0a] dark:text-[#f8f8f8] truncate">
@@ -200,8 +258,16 @@ const CheckoutPage = () => {
                   </div>
                   <div className="flex justify-between text-[#6b4040] dark:text-[#c9a97a]">
                     <span>Delivery</span>
-                    <span className={getDeliveryFee() === 0 ? "text-emerald-600 font-semibold" : ""}>
-                      {getDeliveryFee() === 0 ? "FREE" : `$${getDeliveryFee().toFixed(2)}`}
+                    <span
+                      className={
+                        getDeliveryFee() === 0
+                          ? "text-emerald-600 font-semibold"
+                          : ""
+                      }
+                    >
+                      {getDeliveryFee() === 0
+                        ? "FREE"
+                        : `$${getDeliveryFee().toFixed(2)}`}
                     </span>
                   </div>
                   <div className="flex justify-between text-[#6b4040] dark:text-[#c9a97a]">
@@ -210,7 +276,9 @@ const CheckoutPage = () => {
                   </div>
                   <div className="flex justify-between font-bold text-base text-[#1a0a0a] dark:text-[#f8f8f8] pt-2 border-t border-[#E5D0AC] dark:border-[#3d1a1a]">
                     <span>Total</span>
-                    <span className="text-primary">${getGrandTotal().toFixed(2)}</span>
+                    <span className="text-primary">
+                      ${getGrandTotal().toFixed(2)}
+                    </span>
                   </div>
                 </div>
 

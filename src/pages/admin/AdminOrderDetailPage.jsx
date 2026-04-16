@@ -1,22 +1,44 @@
 import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { useOrderStore, useAppStore, useTrackingStore } from "@/store";
+import {
+  useOrderStore,
+  useAppStore,
+  useTrackingStore,
+  useDriverStore,
+} from "@/store";
 import { DashboardLayout } from "@/layouts";
-import { Card, Badge, Button, Stepper, Modal, MapSimulation } from "@/components";
+import {
+  Card,
+  Badge,
+  Button,
+  Stepper,
+  Modal,
+  MapSimulation,
+} from "@/components";
 import {
   ORDER_STATUS,
   STATUS_LABELS,
   STATUS_TRANSITIONS,
-  MOCK_DRIVERS,
   canTransition,
 } from "@/constants";
 
 const AdminOrderDetailPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { getOrderById, updateOrderStatus, assignDriver, cancelOrder } = useOrderStore();
+  const {
+    getOrderById,
+    updateOrderStatus,
+    assignDriverByAdmin,
+    cancelOrder,
+  } = useOrderStore();
+  const { drivers, getAvailableDrivers } = useDriverStore();
   const { addToast } = useAppStore();
-  const { addNotification, driverLocation, customerLocation, restaurantLocation } = useTrackingStore();
+  const {
+    addNotification,
+    driverLocation,
+    customerLocation,
+    restaurantLocation,
+  } = useTrackingStore();
 
   const [showAssignDriver, setShowAssignDriver] = useState(false);
   const [showForceStatus, setShowForceStatus] = useState(false);
@@ -31,8 +53,12 @@ const AdminOrderDetailPage = () => {
       <DashboardLayout role="admin">
         <div className="text-center py-16">
           <div className="text-5xl mb-3">❓</div>
-          <p className="font-bold text-[#1a0a0a] dark:text-[#f8f8f8] mb-2">Order not found</p>
-          <Button onClick={() => navigate("/admin/orders")} variant="primary">Back</Button>
+          <p className="font-bold text-[#1a0a0a] dark:text-[#f8f8f8] mb-2">
+            Order not found
+          </p>
+          <Button onClick={() => navigate("/admin/orders")} variant="primary">
+            Back
+          </Button>
         </div>
       </DashboardLayout>
     );
@@ -44,9 +70,25 @@ const AdminOrderDetailPage = () => {
     if (!selectedDriver) return;
     setIsUpdating(true);
     await new Promise((r) => setTimeout(r, 600));
-    assignDriver(order.id, selectedDriver);
-    addToast({ type: "success", title: "Driver assigned!", message: `Driver assigned to order ${order.id}` });
-    addNotification({ type: "order", title: "Driver Assigned", message: `Order ${order.id} assigned to driver` });
+    const result = assignDriverByAdmin(order.id, selectedDriver);
+    if (result.success) {
+      addToast({
+        type: "success",
+        title: "Driver assigned!",
+        message: `Driver assigned to order ${order.id}`,
+      });
+      addNotification({
+        type: "order",
+        title: "Driver Assigned",
+        message: `Order ${order.id} assigned to driver`,
+      });
+    } else {
+      addToast({
+        type: "error",
+        title: "Assignment failed",
+        message: result.error,
+      });
+    }
     setShowAssignDriver(false);
     setIsUpdating(false);
   };
@@ -57,7 +99,11 @@ const AdminOrderDetailPage = () => {
     await new Promise((r) => setTimeout(r, 600));
     const result = updateOrderStatus(order.id, targetStatus, "Admin override");
     if (result.success) {
-      addToast({ type: "success", title: "Status updated!", message: `Order is now: ${STATUS_LABELS[targetStatus]}` });
+      addToast({
+        type: "success",
+        title: "Status updated!",
+        message: `Order is now: ${STATUS_LABELS[targetStatus]}`,
+      });
     } else {
       addToast({ type: "error", title: "Error", message: result.error });
     }
@@ -72,7 +118,11 @@ const AdminOrderDetailPage = () => {
     if (result.success) {
       addToast({ type: "info", title: "Order cancelled" });
     } else {
-      addToast({ type: "error", title: "Cannot cancel", message: result.error });
+      addToast({
+        type: "error",
+        title: "Cannot cancel",
+        message: result.error,
+      });
     }
     setIsUpdating(false);
   };
@@ -105,7 +155,9 @@ const AdminOrderDetailPage = () => {
             {/* Map */}
             <Card padding="p-0">
               <div className="px-5 py-4 border-b border-[#E5D0AC] dark:border-[#3d1a1a]">
-                <h2 className="font-bold text-[#1a0a0a] dark:text-[#f8f8f8]">📍 Live Map</h2>
+                <h2 className="font-bold text-[#1a0a0a] dark:text-[#f8f8f8]">
+                  📍 Live Map
+                </h2>
               </div>
               <MapSimulation
                 driverLocation={order.driver ? driverLocation : null}
@@ -118,9 +170,13 @@ const AdminOrderDetailPage = () => {
 
             {/* Order progress */}
             <Card>
-              <h2 className="font-bold text-[#1a0a0a] dark:text-[#f8f8f8] mb-5">Order Progress</h2>
+              <h2 className="font-bold text-[#1a0a0a] dark:text-[#f8f8f8] mb-5">
+                Order Progress
+              </h2>
               {order.status === ORDER_STATUS.CANCELLED ? (
-                <div className="text-center py-4 text-red-500 font-bold">❌ Order Cancelled</div>
+                <div className="text-center py-4 text-red-500 font-bold">
+                  ❌ Order Cancelled
+                </div>
               ) : (
                 <Stepper currentStatus={order.status} />
               )}
@@ -128,35 +184,61 @@ const AdminOrderDetailPage = () => {
 
             {/* Items */}
             <Card>
-              <h2 className="font-bold text-[#1a0a0a] dark:text-[#f8f8f8] mb-4">Order Items</h2>
+              <h2 className="font-bold text-[#1a0a0a] dark:text-[#f8f8f8] mb-4">
+                Order Items
+              </h2>
               <div className="divide-y divide-[#E5D0AC]/50 dark:divide-[#3d1a1a]/50">
                 {order.items?.map((item, i) => (
-                  <div key={i} className="flex items-center gap-3 py-2.5 text-sm">
+                  <div
+                    key={i}
+                    className="flex items-center gap-3 py-2.5 text-sm"
+                  >
                     <div className="w-9 h-9 rounded-lg overflow-hidden bg-gray-100 flex-shrink-0 border border-gray-100">
-                      <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
+                      <img
+                        src={item.image}
+                        alt={item.name}
+                        className="w-full h-full object-cover"
+                      />
                     </div>
-                    <span className="flex-1 font-medium text-[#1a0a0a] dark:text-[#f8f8f8]">{item.name}</span>
-                    <span className="text-[#6b4040] dark:text-[#c9a97a]">x{item.quantity}</span>
-                    <span className="font-bold text-primary">${(item.price * item.quantity).toFixed(2)}</span>
+                    <span className="flex-1 font-medium text-[#1a0a0a] dark:text-[#f8f8f8]">
+                      {item.name}
+                    </span>
+                    <span className="text-[#6b4040] dark:text-[#c9a97a]">
+                      x{item.quantity}
+                    </span>
+                    <span className="font-bold text-primary">
+                      ${(item.price * item.quantity).toFixed(2)}
+                    </span>
                   </div>
                 ))}
               </div>
               <div className="mt-3 pt-3 border-t border-[#E5D0AC] dark:border-[#3d1a1a] space-y-1 text-sm">
                 <div className="flex justify-between text-[#6b4040] dark:text-[#c9a97a]">
-                  <span>Subtotal</span><span>${order.subtotal?.toFixed(2)}</span>
+                  <span>Subtotal</span>
+                  <span>${order.subtotal?.toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between text-[#6b4040] dark:text-[#c9a97a]">
-                  <span>Delivery</span><span>{order.deliveryFee === 0 ? "FREE" : `$${order.deliveryFee?.toFixed(2)}`}</span>
+                  <span>Delivery</span>
+                  <span>
+                    {order.deliveryFee === 0
+                      ? "FREE"
+                      : `$${order.deliveryFee?.toFixed(2)}`}
+                  </span>
                 </div>
                 <div className="flex justify-between font-bold text-[#1a0a0a] dark:text-[#f8f8f8] text-base">
-                  <span>Total</span><span className="text-primary">${order.total?.toFixed(2)}</span>
+                  <span>Total</span>
+                  <span className="text-primary">
+                    ${order.total?.toFixed(2)}
+                  </span>
                 </div>
               </div>
             </Card>
 
             {/* Timeline */}
             <Card>
-              <h2 className="font-bold text-[#1a0a0a] dark:text-[#f8f8f8] mb-4">Timeline</h2>
+              <h2 className="font-bold text-[#1a0a0a] dark:text-[#f8f8f8] mb-4">
+                Timeline
+              </h2>
               <div className="space-y-3">
                 {[...order.timeline].reverse().map((entry, i) => (
                   <div key={i} className="flex items-start gap-3 text-sm">
@@ -164,9 +246,17 @@ const AdminOrderDetailPage = () => {
                       ✓
                     </div>
                     <div>
-                      <p className="font-semibold text-[#1a0a0a] dark:text-[#f8f8f8]">{STATUS_LABELS[entry.status]}</p>
-                      {entry.note && <p className="text-xs text-[#6b4040] dark:text-[#c9a97a]">{entry.note}</p>}
-                      <p className="text-xs text-[#9e7272]">{new Date(entry.timestamp).toLocaleTimeString()}</p>
+                      <p className="font-semibold text-[#1a0a0a] dark:text-[#f8f8f8]">
+                        {STATUS_LABELS[entry.status]}
+                      </p>
+                      {entry.note && (
+                        <p className="text-xs text-[#6b4040] dark:text-[#c9a97a]">
+                          {entry.note}
+                        </p>
+                      )}
+                      <p className="text-xs text-[#9e7272]">
+                        {new Date(entry.timestamp).toLocaleTimeString()}
+                      </p>
                     </div>
                   </div>
                 ))}
@@ -177,9 +267,13 @@ const AdminOrderDetailPage = () => {
           <div className="space-y-5">
             {/* Customer info */}
             <Card>
-              <h2 className="font-bold text-[#1a0a0a] dark:text-[#f8f8f8] mb-3">Customer Info</h2>
+              <h2 className="font-bold text-[#1a0a0a] dark:text-[#f8f8f8] mb-3">
+                Customer Info
+              </h2>
               <div className="space-y-2 text-sm text-[#6b4040] dark:text-[#c9a97a]">
-                <p className="font-bold text-[#1a0a0a] dark:text-[#f8f8f8]">{order.customerName}</p>
+                <p className="font-bold text-[#1a0a0a] dark:text-[#f8f8f8]">
+                  {order.customerName}
+                </p>
                 {order.customerPhone && <p>📱 {order.customerPhone}</p>}
                 <p>📍 {order.customerAddress}</p>
                 {order.notes && (
@@ -192,20 +286,44 @@ const AdminOrderDetailPage = () => {
 
             {/* Driver info */}
             <Card>
-              <h2 className="font-bold text-[#1a0a0a] dark:text-[#f8f8f8] mb-3">Driver</h2>
+              <h2 className="font-bold text-[#1a0a0a] dark:text-[#f8f8f8] mb-3">
+                Driver
+              </h2>
+              {order.driverId && (
+                <div
+                  className={`mb-3 text-[11px] px-2.5 py-1.5 rounded-lg font-semibold w-fit ${
+                    order.autoAssigned
+                      ? "bg-emerald-100 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-300"
+                      : "bg-amber-100 dark:bg-amber-900/20 text-amber-700 dark:text-amber-300"
+                  }`}
+                >
+                  {order.autoAssigned ? "Auto Assigned" : "Manual Override"}
+                </div>
+              )}
+              {typeof order.assignmentScore === "number" && (
+                <p className="text-xs text-[#6b4040] dark:text-[#c9a97a] mb-3">
+                  Assignment score: {order.assignmentScore.toFixed(3)}
+                </p>
+              )}
               {order.driver ? (
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 bg-gradient-brand rounded-full flex items-center justify-center text-white font-bold">
                     {order.driver.name?.[0]}
                   </div>
                   <div>
-                    <p className="font-bold text-[#1a0a0a] dark:text-[#f8f8f8]">{order.driver.name}</p>
-                    <p className="text-xs text-[#6b4040] dark:text-[#c9a97a]">⭐ {order.driver.rating}</p>
+                    <p className="font-bold text-[#1a0a0a] dark:text-[#f8f8f8]">
+                      {order.driver.name}
+                    </p>
+                    <p className="text-xs text-[#6b4040] dark:text-[#c9a97a]">
+                      ⭐ {order.driver.rating}
+                    </p>
                   </div>
                 </div>
               ) : (
                 <div className="text-center py-3">
-                  <p className="text-sm text-[#6b4040] dark:text-[#c9a97a] mb-3">No driver assigned</p>
+                  <p className="text-sm text-[#6b4040] dark:text-[#c9a97a] mb-3">
+                    No driver assigned
+                  </p>
                   <Button
                     variant="primary"
                     size="sm"
@@ -231,21 +349,24 @@ const AdminOrderDetailPage = () => {
 
             {/* Admin actions */}
             <Card>
-              <h2 className="font-bold text-[#1a0a0a] dark:text-[#f8f8f8] mb-4">Admin Actions</h2>
+              <h2 className="font-bold text-[#1a0a0a] dark:text-[#f8f8f8] mb-4">
+                Admin Actions
+              </h2>
               <div className="space-y-2">
-                {allowedNextStatuses.length > 0 && allowedNextStatuses[0] !== ORDER_STATUS.CANCELLED && (
-                  <Button
-                    variant="primary"
-                    size="sm"
-                    className="w-full"
-                    onClick={() => {
-                      setTargetStatus(allowedNextStatuses[0]);
-                      setShowForceStatus(true);
-                    }}
-                  >
-                    Force → {STATUS_LABELS[allowedNextStatuses[0]]}
-                  </Button>
-                )}
+                {allowedNextStatuses.length > 0 &&
+                  allowedNextStatuses[0] !== ORDER_STATUS.CANCELLED && (
+                    <Button
+                      variant="primary"
+                      size="sm"
+                      className="w-full"
+                      onClick={() => {
+                        setTargetStatus(allowedNextStatuses[0]);
+                        setShowForceStatus(true);
+                      }}
+                    >
+                      Force → {STATUS_LABELS[allowedNextStatuses[0]]}
+                    </Button>
+                  )}
                 {canTransition(order.status, ORDER_STATUS.CANCELLED) && (
                   <Button
                     variant="danger"
@@ -268,14 +389,25 @@ const AdminOrderDetailPage = () => {
             {/* Rating */}
             {order.rating !== null && order.rating !== undefined && (
               <Card>
-                <h2 className="font-bold text-[#1a0a0a] dark:text-[#f8f8f8] mb-2">Customer Rating</h2>
+                <h2 className="font-bold text-[#1a0a0a] dark:text-[#f8f8f8] mb-2">
+                  Customer Rating
+                </h2>
                 <div className="flex gap-0.5">
-                  {[1,2,3,4,5].map((s) => (
-                    <span key={s} className={`text-xl ${s <= order.rating ? "text-amber-400" : "text-gray-300"}`}>★</span>
+                  {[1, 2, 3, 4, 5].map((s) => (
+                    <span
+                      key={s}
+                      className={`text-xl ${
+                        s <= order.rating ? "text-amber-400" : "text-gray-300"
+                      }`}
+                    >
+                      ★
+                    </span>
                   ))}
                 </div>
                 {order.ratingComment && (
-                  <p className="text-sm text-[#6b4040] dark:text-[#c9a97a] mt-1">"{order.ratingComment}"</p>
+                  <p className="text-sm text-[#6b4040] dark:text-[#c9a97a] mt-1">
+                    "{order.ratingComment}"
+                  </p>
                 )}
               </Card>
             )}
@@ -290,15 +422,22 @@ const AdminOrderDetailPage = () => {
         title="Assign Driver 🛵"
         footer={
           <>
-            <Button variant="ghost" onClick={() => setShowAssignDriver(false)}>Cancel</Button>
-            <Button variant="primary" loading={isUpdating} onClick={handleAssignDriver} disabled={!selectedDriver}>
+            <Button variant="ghost" onClick={() => setShowAssignDriver(false)}>
+              Cancel
+            </Button>
+            <Button
+              variant="primary"
+              loading={isUpdating}
+              onClick={handleAssignDriver}
+              disabled={!selectedDriver}
+            >
               Assign
             </Button>
           </>
         }
       >
         <div className="space-y-3">
-          {MOCK_DRIVERS.map((driver) => (
+          {drivers.map((driver) => (
             <button
               key={driver.id}
               onClick={() => setSelectedDriver(driver.id)}
@@ -312,17 +451,24 @@ const AdminOrderDetailPage = () => {
                 {driver.name[0]}
               </div>
               <div className="flex-1">
-                <p className="font-bold text-[#1a0a0a] dark:text-[#f8f8f8]">{driver.name}</p>
+                <p className="font-bold text-[#1a0a0a] dark:text-[#f8f8f8]">
+                  {driver.name}
+                </p>
                 <p className="text-xs text-[#6b4040] dark:text-[#c9a97a]">
-                  ⭐ {driver.rating} · {driver.vehicleType} · {driver.deliveries} deliveries
+                  ⭐ {driver.rating} · {driver.vehicleType} ·{" "}
+                  {driver.deliveries} deliveries
                 </p>
               </div>
-              <span className={`text-xs px-2 py-1 rounded-full font-semibold ${
-                driver.status === "available"
-                  ? "bg-emerald-100 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-300"
-                  : "bg-amber-100 dark:bg-amber-900/20 text-amber-700 dark:text-amber-300"
-              }`}>
-                {driver.status}
+              <span
+                className={`text-xs px-2 py-1 rounded-full font-semibold ${
+                  driver.status === "online" && driver.availability === "free"
+                    ? "bg-emerald-100 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-300"
+                    : driver.status === "offline"
+                    ? "bg-gray-100 dark:bg-gray-900/30 text-gray-600 dark:text-gray-300"
+                    : "bg-amber-100 dark:bg-amber-900/20 text-amber-700 dark:text-amber-300"
+                }`}
+              >
+                {driver.status === "online" ? driver.availability : "offline"}
               </span>
             </button>
           ))}
@@ -336,8 +482,14 @@ const AdminOrderDetailPage = () => {
         title="Force Status Update"
         footer={
           <>
-            <Button variant="ghost" onClick={() => setShowForceStatus(false)}>Cancel</Button>
-            <Button variant="primary" loading={isUpdating} onClick={handleForceStatus}>
+            <Button variant="ghost" onClick={() => setShowForceStatus(false)}>
+              Cancel
+            </Button>
+            <Button
+              variant="primary"
+              loading={isUpdating}
+              onClick={handleForceStatus}
+            >
               Update Status
             </Button>
           </>
@@ -347,19 +499,21 @@ const AdminOrderDetailPage = () => {
           Force update order {order.id} to:
         </p>
         <div className="space-y-2">
-          {allowedNextStatuses.filter(s => s !== ORDER_STATUS.CANCELLED).map((status) => (
-            <button
-              key={status}
-              onClick={() => setTargetStatus(status)}
-              className={`w-full flex items-center gap-3 p-3 rounded-xl border-2 transition-all text-left ${
-                targetStatus === status
-                  ? "border-primary bg-primary/10"
-                  : "border-[#E5D0AC] dark:border-[#3d1a1a] hover:border-primary/50"
-              }`}
-            >
-              <Badge status={status} />
-            </button>
-          ))}
+          {allowedNextStatuses
+            .filter((s) => s !== ORDER_STATUS.CANCELLED)
+            .map((status) => (
+              <button
+                key={status}
+                onClick={() => setTargetStatus(status)}
+                className={`w-full flex items-center gap-3 p-3 rounded-xl border-2 transition-all text-left ${
+                  targetStatus === status
+                    ? "border-primary bg-primary/10"
+                    : "border-[#E5D0AC] dark:border-[#3d1a1a] hover:border-primary/50"
+                }`}
+              >
+                <Badge status={status} />
+              </button>
+            ))}
         </div>
       </Modal>
     </DashboardLayout>

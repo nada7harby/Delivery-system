@@ -1,12 +1,23 @@
 import { Link } from "react-router-dom";
-import { useCartStore, useAppStore } from "@/store";
+import { useCartStore, useAppStore, useMarketplaceStore } from "@/store";
 import { CustomerLayout } from "@/layouts";
 import { Button, Card, EmptyState } from "@/components";
 
 const CartPage = () => {
-  const { items, removeItem, updateQuantity, getTotal, getDeliveryFee, getTax, getGrandTotal, clearCart } =
-    useCartStore();
+  const {
+    items,
+    removeItem,
+    updateQuantity,
+    getTotal,
+    getDeliveryFee,
+    getTax,
+    getGrandTotal,
+    clearCart,
+  } = useCartStore();
+  const { restaurantId } = useCartStore();
+  const { getRestaurantById } = useMarketplaceStore();
   const { addToast } = useAppStore();
+  const restaurant = getRestaurantById(restaurantId);
 
   const handleRemove = (item) => {
     removeItem(item.id);
@@ -27,7 +38,7 @@ const CartPage = () => {
           action={
             <Link to="/">
               <Button variant="primary" size="lg" icon="🍔">
-                Browse Menu
+                Browse Restaurants
               </Button>
             </Link>
           }
@@ -44,13 +55,26 @@ const CartPage = () => {
             Your Cart 🛒
           </h1>
 
+          {restaurant && (
+            <div className="mb-4 text-sm text-[#6b4040] dark:text-[#c9a97a]">
+              Ordering from{" "}
+              <span className="font-semibold text-[#1a0a0a] dark:text-[#f8f8f8]">
+                {restaurant.name}
+              </span>
+            </div>
+          )}
+
           <div className="grid lg:grid-cols-3 gap-6">
             {/* ... items ... */}
             <div className="lg:col-span-2 space-y-3">
               {items.map((item) => (
                 <Card key={item.id} className="flex items-center gap-4">
                   <div className="w-16 h-16 bg-gray-100 dark:bg-gray-900 rounded-xl flex items-center justify-center overflow-hidden flex-shrink-0 border border-gray-100 dark:border-gray-800">
-                    <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
+                    <img
+                      src={item.image}
+                      alt={item.name}
+                      className="w-full h-full object-cover"
+                    />
                   </div>
 
                   <div className="flex-1 min-w-0">
@@ -119,12 +143,20 @@ const CartPage = () => {
                 <div className="space-y-3 text-sm">
                   <div className="flex justify-between text-[#6b4040] dark:text-[#c9a97a]">
                     <span>Subtotal ({items.length} items)</span>
-                    <span className="font-medium">${getTotal().toFixed(2)}</span>
+                    <span className="font-medium">
+                      ${getTotal().toFixed(2)}
+                    </span>
                   </div>
                   <div className="flex justify-between text-[#6b4040] dark:text-[#c9a97a]">
                     <span>Delivery fee</span>
-                    <span className={`font-medium ${getDeliveryFee() === 0 ? "text-emerald-600" : ""}`}>
-                      {getDeliveryFee() === 0 ? "FREE" : `$${getDeliveryFee().toFixed(2)}`}
+                    <span
+                      className={`font-medium ${
+                        getDeliveryFee() === 0 ? "text-emerald-600" : ""
+                      }`}
+                    >
+                      {getDeliveryFee() === 0
+                        ? "FREE"
+                        : `$${getDeliveryFee().toFixed(2)}`}
                     </span>
                   </div>
                   <div className="flex justify-between text-[#6b4040] dark:text-[#c9a97a]">
@@ -138,16 +170,26 @@ const CartPage = () => {
                   )}
                   <div className="pt-3 border-t border-[#E5D0AC] dark:border-[#3d1a1a] flex justify-between font-bold text-base text-[#1a0a0a] dark:text-[#f8f8f8]">
                     <span>Total</span>
-                    <span className="text-primary">${getGrandTotal().toFixed(2)}</span>
+                    <span className="text-primary">
+                      ${getGrandTotal().toFixed(2)}
+                    </span>
                   </div>
                 </div>
 
                 <Link to="/checkout" className="block mt-6">
-                  <Button variant="primary" size="lg" className="w-full" iconRight="→">
+                  <Button
+                    variant="primary"
+                    size="lg"
+                    className="w-full"
+                    iconRight="→"
+                  >
                     Proceed to Checkout
                   </Button>
                 </Link>
-                <Link to="/" className="block mt-2">
+                <Link
+                  to={restaurantId ? `/restaurant/${restaurantId}` : "/"}
+                  className="block mt-2"
+                >
                   <Button variant="ghost" size="sm" className="w-full">
                     Continue Shopping
                   </Button>

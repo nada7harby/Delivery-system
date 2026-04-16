@@ -2,9 +2,16 @@ import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { useOrderStore, useTrackingStore, useAppStore } from "@/store";
 import { CustomerLayout } from "@/layouts";
-import { Card, Badge, Stepper, Button, MapSimulation, Modal } from "@/components";
+import {
+  Card,
+  Badge,
+  Stepper,
+  Button,
+  MapSimulation,
+  Modal,
+} from "@/components";
 import { ORDER_STATUS, STATUS_LABELS, STATUS_ICONS } from "@/constants";
-import clsx from "clsx";
+import { socket } from "@/services";
 
 const StarRating = ({ value, onChange }) => (
   <div className="flex gap-1">
@@ -25,7 +32,7 @@ const StarRating = ({ value, onChange }) => (
 
 const OrderTrackingPage = () => {
   const { id } = useParams();
-  const { getOrderById, updateOrderStatus, rateOrder } = useOrderStore();
+  const { getOrderById, getAssignmentStatus, rateOrder } = useOrderStore();
   const {
     startTracking,
     stopTracking,
@@ -42,6 +49,7 @@ const OrderTrackingPage = () => {
   const [ratingComment, setRatingComment] = useState("");
 
   const order = getOrderById(id);
+  const assignmentStatus = getAssignmentStatus(id);
 
   useEffect(() => {
     if (
@@ -53,6 +61,36 @@ const OrderTrackingPage = () => {
     }
     return () => stopTracking();
   }, [id]);
+
+  useEffect(() => {
+    const onDriverAssigned = (payload) => {
+      if (payload?.orderId !== id) return;
+      addToast({
+        type: "success",
+        title: "Driver assigned",
+        message: `Driver assigned: ${payload.driverName}`,
+      });
+    };
+
+    const onDriverRejected = (payload) => {
+      if (payload?.orderId !== id) return;
+      addToast({
+        type: "warning",
+        title: "Reassigning order",
+        message:
+          payload.reason ||
+          "Driver rejected the order. Finding next best driver...",
+      });
+    };
+
+    socket.on("driver-assigned", onDriverAssigned);
+    socket.on("driver-rejected", onDriverRejected);
+
+    return () => {
+      socket.off("driver-assigned", onDriverAssigned);
+      socket.off("driver-rejected", onDriverRejected);
+    };
+  }, [id, addToast]);
 
   if (!order) {
     return (
@@ -101,8 +139,7 @@ const OrderTrackingPage = () => {
               </Link>
             </div>
             <h1 className="font-display text-2xl font-bold text-[#1a0a0a] dark:text-[#f8f8f8]">
-              Tracking Order{" "}
-              <span className="text-primary">#{order.id}</span>
+              Tracking Order <span className="text-primary">#{order.id}</span>
             </h1>
             <p className="text-sm text-[#6b4040] dark:text-[#c9a97a] mt-1">
               {new Date(order.createdAt).toLocaleString()}
@@ -139,10 +176,30 @@ const OrderTrackingPage = () => {
               {!order.driver && (
                 <div className="px-5 py-3 text-sm text-[#6b4040] dark:text-[#c9a97a] flex items-center gap-2">
                   <span className="animate-spin-slow text-base">⏳</span>
-                  Waiting for a driver to be assigned...
+                  {assignmentStatus?.message || "Searching for driver..."}
                 </div>
               )}
             </Card>
+
+            {assignmentStatus && (
+              <Card>
+                <div className="flex items-center justify-between gap-3">
+                  <div>
+                    <p className="font-bold text-[#1a0a0a] dark:text-[#f8f8f8]">
+                      Smart Assignment
+                    </p>
+                    <p className="text-sm text-[#6b4040] dark:text-[#c9a97a]">
+                      {assignmentStatus.message}
+                    </p>
+                  </div>
+                  {typeof assignmentStatus.score === "number" && (
+                    <div className="px-2.5 py-1.5 rounded-lg bg-primary/10 text-primary text-xs font-semibold">
+                      score {assignmentStatus.score.toFixed(3)}
+                    </div>
+                  )}
+                </div>
+              </Card>
+            )}
 
             {/* Stepper */}
             <Card>
@@ -197,6 +254,11 @@ const OrderTrackingPage = () => {
                 <h2 className="font-bold text-[#1a0a0a] dark:text-[#f8f8f8] mb-3 flex items-center gap-2">
                   🛵 Your Driver
                 </h2>
+                {order.awaitingDriverResponse && (
+                  <div className="mb-3 text-xs px-2.5 py-1.5 rounded-lg bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-300 font-semibold">
+                    Driver notified. Waiting for acceptance...
+                  </div>
+                )}
                 <div className="flex items-center gap-3">
                   <div className="w-12 h-12 bg-gradient-brand rounded-full flex items-center justify-center text-white text-xl font-bold flex-shrink-0">
                     {order.driver.name?.[0]}
@@ -230,7 +292,11 @@ const OrderTrackingPage = () => {
                 {order.items.map((item, i) => (
                   <div key={i} className="flex items-center gap-2 text-sm">
                     <div className="w-8 h-8 rounded-lg overflow-hidden bg-gray-100 flex-shrink-0 border border-gray-100">
-                       <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
+                      <img
+                        src={item.image}
+                        alt={item.name}
+                        className="w-full h-full object-cover"
+                      />
                     </div>
                     <span className="flex-1 text-[#1a0a0a] dark:text-[#f8f8f8]">
                       {item.name} x{item.quantity}
@@ -248,11 +314,17 @@ const OrderTrackingPage = () => {
                 </div>
                 <div className="flex justify-between text-[#6b4040] dark:text-[#c9a97a]">
                   <span>Delivery</span>
-                  <span>{order.deliveryFee === 0 ? "FREE" : `$${order.deliveryFee?.toFixed(2)}`}</span>
+                  <span>
+                    {order.deliveryFee === 0
+                      ? "FREE"
+                      : `$${order.deliveryFee?.toFixed(2)}`}
+                  </span>
                 </div>
                 <div className="flex justify-between font-bold text-[#1a0a0a] dark:text-[#f8f8f8]">
                   <span>Total</span>
-                  <span className="text-primary">${order.total?.toFixed(2)}</span>
+                  <span className="text-primary">
+                    ${order.total?.toFixed(2)}
+                  </span>
                 </div>
               </div>
             </Card>
@@ -289,8 +361,17 @@ const OrderTrackingPage = () => {
                       Your Rating
                     </p>
                     <div className="flex justify-center gap-0.5">
-                      {[1,2,3,4,5].map((s) => (
-                        <span key={s} className={`text-2xl ${s <= order.rating ? "text-amber-400" : "text-gray-300"}`}>★</span>
+                      {[1, 2, 3, 4, 5].map((s) => (
+                        <span
+                          key={s}
+                          className={`text-2xl ${
+                            s <= order.rating
+                              ? "text-amber-400"
+                              : "text-gray-300"
+                          }`}
+                        >
+                          ★
+                        </span>
                       ))}
                     </div>
                     {order.ratingComment && (

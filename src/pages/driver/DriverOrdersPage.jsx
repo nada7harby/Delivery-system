@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { useOrderStore, useAuthStore } from "@/store";
+import { useOrderStore, useAuthStore, useDriverStore } from "@/store";
 import { DashboardLayout } from "@/layouts";
 import { Card, Badge, Button, EmptyState } from "@/components";
 import { ORDER_STATUS } from "@/constants";
@@ -15,20 +15,23 @@ const TABS = [
 const DriverOrdersPage = () => {
   const { user } = useAuthStore();
   const { orders } = useOrderStore();
+  const { getDriverByUser } = useDriverStore();
   const [activeTab, setActiveTab] = useState("active");
 
+  const loggedDriver = getDriverByUser(user);
+
   const myOrders = orders.filter(
-    (o) => o.driver?.id === user?.id || o.driver?.name === user?.name
+    (o) => o.driverId === loggedDriver?.id || o.driver?.id === loggedDriver?.id,
   );
   const pendingOrders = orders.filter(
-    (o) => o.status === ORDER_STATUS.PENDING && !o.driver
+    (o) => o.status === ORDER_STATUS.PENDING && !o.driverId,
   );
 
   const tabs = {
     active: myOrders.filter(
       (o) =>
         o.status !== ORDER_STATUS.DELIVERED &&
-        o.status !== ORDER_STATUS.CANCELLED
+        o.status !== ORDER_STATUS.CANCELLED,
     ),
     available: pendingOrders,
     completed: myOrders.filter((o) => o.status === ORDER_STATUS.DELIVERED),
@@ -54,7 +57,7 @@ const DriverOrdersPage = () => {
               "flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-semibold transition-all",
               activeTab === tab.id
                 ? "bg-white dark:bg-[#430000] text-primary shadow-sm"
-                : "text-[#6b4040] dark:text-[#c9a97a] hover:text-primary"
+                : "text-[#6b4040] dark:text-[#c9a97a] hover:text-primary",
             )}
           >
             {tab.icon} {tab.label}
@@ -67,7 +70,13 @@ const DriverOrdersPage = () => {
 
       {displayed.length === 0 ? (
         <EmptyState
-          icon={activeTab === "active" ? "😴" : activeTab === "available" ? "🎯" : "📭"}
+          icon={
+            activeTab === "active"
+              ? "😴"
+              : activeTab === "available"
+              ? "🎯"
+              : "📭"
+          }
           title={
             activeTab === "active"
               ? "No active orders"

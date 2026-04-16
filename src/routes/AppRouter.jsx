@@ -10,6 +10,8 @@ import LoginPage from "@/pages/LoginPage";
 import RegisterPage from "@/pages/RegisterPage";
 
 // Customer pages
+import RestaurantsPage from "@/pages/customer/RestaurantsPage";
+import RestaurantDetailsPage from "@/pages/customer/RestaurantDetailsPage";
 import MenuPage from "@/pages/customer/MenuPage";
 import CartPage from "@/pages/customer/CartPage";
 import CheckoutPage from "@/pages/customer/CheckoutPage";
@@ -36,7 +38,9 @@ const NotFoundPage = () => (
   <div className="min-h-screen flex flex-col items-center justify-center bg-[#f8f8f8] dark:bg-[#0f0505]">
     <div className="text-8xl mb-4 animate-bounce">🛵</div>
     <h1 className="font-display text-4xl font-black text-gradient mb-2">404</h1>
-    <p className="text-[#6b4040] dark:text-[#c9a97a] mb-6">This page doesn't exist!</p>
+    <p className="text-[#6b4040] dark:text-[#c9a97a] mb-6">
+      This page doesn't exist!
+    </p>
     <a
       href="/"
       className="btn-primary text-sm px-5 py-2.5 rounded-xl font-semibold text-white bg-primary hover:bg-primary-light"
@@ -81,17 +85,29 @@ const AppRouter = () => {
         <Route
           path="/register"
           element={
-            isAuthenticated ? (
-              <Navigate to="/" replace />
-            ) : (
-              <RegisterPage />
-            )
+            isAuthenticated ? <Navigate to="/" replace /> : <RegisterPage />
           }
         />
 
         {/* Customer routes */}
         <Route
           path="/"
+          element={
+            <ProtectedRoute allowedRoles={["customer"]}>
+              <RestaurantsPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/restaurant/:id"
+          element={
+            <ProtectedRoute allowedRoles={["customer"]}>
+              <RestaurantDetailsPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/menu"
           element={
             <ProtectedRoute allowedRoles={["customer"]}>
               <MenuPage />
