@@ -6,6 +6,8 @@ export { default as Modal } from "./Modal";
 export { default as Stepper } from "./Stepper";
 export { default as ToastContainer } from "./ToastContainer";
 export { default as MapSimulation } from "./MapSimulation";
+export { default as MultiOrderTrackingMap } from "./MultiOrderTrackingMap";
+export { default as HeatmapSimulationMap } from "./HeatmapSimulationMap";
 export { default as EmptyState } from "./EmptyState";
 export { default as LoadingSpinner, PageLoader } from "./LoadingSpinner";
 export { default as CustomSelect } from "./CustomSelect";

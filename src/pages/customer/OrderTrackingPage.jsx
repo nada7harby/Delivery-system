@@ -1,6 +1,11 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useParams, Link } from "react-router-dom";
-import { useOrderStore, useTrackingStore, useAppStore } from "@/store";
+import {
+  useOrderStore,
+  useTrackingStore,
+  useAppStore,
+  useAuthStore,
+} from "@/store";
 import { CustomerLayout } from "@/layouts";
 import {
   Card,
@@ -32,7 +37,14 @@ const StarRating = ({ value, onChange }) => (
 
 const OrderTrackingPage = () => {
   const { id } = useParams();
-  const { getOrderById, getAssignmentStatus, rateOrder } = useOrderStore();
+  const {
+    getOrderById,
+    getAssignmentStatus,
+    rateOrder,
+    canCancelOrder,
+    requestOrderCancellation,
+  } = useOrderStore();
+  const { user } = useAuthStore();
   const {
     startTracking,
     stopTracking,
@@ -47,6 +59,11 @@ const OrderTrackingPage = () => {
   const [showRating, setShowRating] = useState(false);
   const [rating, setRating] = useState(5);
   const [ratingComment, setRatingComment] = useState("");
+  const [showCancelModal, setShowCancelModal] = useState(false);
+  const [cancelReason, setCancelReason] = useState("Changed my mind");
+  const [ackPreparing, setAckPreparing] = useState(false);
+  const [isCancelling, setIsCancelling] = useState(false);
+  const delayedToastShown = useRef({});
 
   const order = getOrderById(id);
   const assignmentStatus = getAssignmentStatus(id);
@@ -57,10 +74,10 @@ const OrderTrackingPage = () => {
       order.status !== ORDER_STATUS.DELIVERED &&
       order.status !== ORDER_STATUS.CANCELLED
     ) {
-      startTracking(id, order.customerAddress);
+      startTracking(id);
     }
     return () => stopTracking();
-  }, [id]);
+  }, [id, order, order?.status, startTracking, stopTracking]);
 
   useEffect(() => {
     const onDriverAssigned = (payload) => {
@@ -83,14 +100,47 @@ const OrderTrackingPage = () => {
       });
     };
 
+    const onOrderDelayed = (payload) => {
+      if (payload?.orderId !== id) return;
+      addToast({
+        type: "warning",
+        title: "Delivery delay detected",
+        message: "Your order is taking longer than expected.",
+      });
+    };
+
+    const onOrderCancelled = (payload) => {
+      if (payload?.orderId !== id) return;
+      addToast({
+        type: "info",
+        title: "Order cancelled",
+        message: payload.cancelReason || "Your order has been cancelled.",
+      });
+    };
+
     socket.on("driver-assigned", onDriverAssigned);
     socket.on("driver-rejected", onDriverRejected);
+    socket.on("order-delayed", onOrderDelayed);
+    socket.on("order-cancelled", onOrderCancelled);
 
     return () => {
       socket.off("driver-assigned", onDriverAssigned);
       socket.off("driver-rejected", onDriverRejected);
+      socket.off("order-delayed", onOrderDelayed);
+      socket.off("order-cancelled", onOrderCancelled);
     };
   }, [id, addToast]);
+
+  useEffect(() => {
+    if (!order?.isDelayed || delayedToastShown.current[order.id]) return;
+
+    delayedToastShown.current[order.id] = true;
+    addToast({
+      type: "warning",
+      title: "Delay update",
+      message: "Your order is taking longer than expected.",
+    });
+  }, [addToast, order?.id, order?.isDelayed]);
 
   if (!order) {
     return (
@@ -113,6 +163,9 @@ const OrderTrackingPage = () => {
   const isLive =
     order.status !== ORDER_STATUS.DELIVERED &&
     order.status !== ORDER_STATUS.CANCELLED;
+  const cancelDecision = canCancelOrder(order, {
+    actorRole: "customer",
+  });
 
   const handleSubmitRating = () => {
     rateOrder(order.id, rating, ratingComment);
@@ -122,6 +175,36 @@ const OrderTrackingPage = () => {
       message: `You rated your experience ${rating} stars`,
     });
     setShowRating(false);
+  };
+
+  const handleCancelOrder = async () => {
+    if (!order) return;
+
+    setIsCancelling(true);
+    const result = requestOrderCancellation(order.id, {
+      actorRole: "customer",
+      actorId: user?.id,
+      reason: cancelReason,
+      acknowledgePreparing: ackPreparing,
+    });
+    setIsCancelling(false);
+
+    if (result.success) {
+      addToast({
+        type: "success",
+        title: "Order cancelled",
+        message: result.message,
+      });
+      setShowCancelModal(false);
+      setAckPreparing(false);
+      return;
+    }
+
+    addToast({
+      type: "warning",
+      title: "Unable to cancel",
+      message: result.error || "Order cannot be cancelled at this stage",
+    });
   };
 
   return (
@@ -177,6 +260,12 @@ const OrderTrackingPage = () => {
                 <div className="px-5 py-3 text-sm text-[#6b4040] dark:text-[#c9a97a] flex items-center gap-2">
                   <span className="animate-spin-slow text-base">⏳</span>
                   {assignmentStatus?.message || "Searching for driver..."}
+                </div>
+              )}
+              {order.isDelayed && (
+                <div className="mx-4 mb-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-2 text-sm text-amber-700 dark:border-amber-900/40 dark:bg-amber-900/20 dark:text-amber-300">
+                  Your order is taking longer than expected. Thank you for your
+                  patience.
                 </div>
               )}
             </Card>
@@ -352,6 +441,31 @@ const OrderTrackingPage = () => {
               </div>
             </Card>
 
+            {order.status !== ORDER_STATUS.CANCELLED &&
+              order.status !== ORDER_STATUS.DELIVERED && (
+                <Card>
+                  <h2 className="font-bold text-[#1a0a0a] dark:text-[#f8f8f8] mb-2">
+                    Need to Cancel?
+                  </h2>
+                  <p className="text-xs text-[#6b4040] dark:text-[#c9a97a] mb-3">
+                    {cancelDecision.allowed
+                      ? cancelDecision.requiresWarning
+                        ? "Your order is being prepared. Cancellation may include partial refund."
+                        : "You can still cancel this order."
+                      : "Order cannot be cancelled at this stage."}
+                  </p>
+                  <Button
+                    variant={cancelDecision.allowed ? "danger" : "outline"}
+                    size="sm"
+                    className="w-full"
+                    disabled={!cancelDecision.allowed}
+                    onClick={() => setShowCancelModal(true)}
+                  >
+                    Cancel Order
+                  </Button>
+                </Card>
+              )}
+
             {/* Rating */}
             {order.status === ORDER_STATUS.DELIVERED && (
               <Card>
@@ -433,6 +547,70 @@ const OrderTrackingPage = () => {
             rows={3}
             className="input w-full resize-none"
           />
+        </div>
+      </Modal>
+
+      <Modal
+        isOpen={showCancelModal}
+        onClose={() => setShowCancelModal(false)}
+        title="Cancel Order"
+        footer={
+          <>
+            <Button variant="ghost" onClick={() => setShowCancelModal(false)}>
+              Keep Order
+            </Button>
+            <Button
+              variant="danger"
+              loading={isCancelling}
+              onClick={handleCancelOrder}
+              disabled={
+                !cancelDecision.allowed ||
+                (cancelDecision.requiresWarning && !ackPreparing)
+              }
+            >
+              Confirm Cancel
+            </Button>
+          </>
+        }
+      >
+        <div className="space-y-4">
+          <p className="text-sm text-[#6b4040] dark:text-[#c9a97a]">
+            Are you sure you want to cancel this order?
+          </p>
+
+          <div>
+            <label className="block text-xs font-semibold text-[#6b4040] dark:text-[#c9a97a] mb-1">
+              Cancellation reason
+            </label>
+            <select
+              value={cancelReason}
+              onChange={(event) => setCancelReason(event.target.value)}
+              className="input"
+            >
+              <option>Changed my mind</option>
+              <option>Wrong delivery address</option>
+              <option>Long waiting time</option>
+              <option>Placed by mistake</option>
+              <option>Other</option>
+            </select>
+          </div>
+
+          {cancelDecision.requiresWarning && (
+            <label className="flex items-start gap-2 text-xs text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-900/20 rounded-lg p-2.5">
+              <input
+                type="checkbox"
+                checked={ackPreparing}
+                onChange={(event) => setAckPreparing(event.target.checked)}
+              />
+              <span>
+                Your order is already being prepared. Partial refund may apply.
+              </span>
+            </label>
+          )}
+
+          {!cancelDecision.allowed && (
+            <p className="text-xs text-red-500">{cancelDecision.message}</p>
+          )}
         </div>
       </Modal>
     </CustomerLayout>

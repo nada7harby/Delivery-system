@@ -200,6 +200,9 @@ const useDriverStore = create(
           drivers.find((d) => d.userId === user.id) ||
           drivers.find((d) => d.id === user.id) ||
           drivers.find((d) => d.name === user.name) ||
+          (user.role === "driver"
+            ? drivers.find((d) => d.status === "online")
+            : null) ||
           null
         );
       },

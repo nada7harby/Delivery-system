@@ -390,7 +390,13 @@ const buildFeed = (orders) => {
 
 const AdminDashboard = () => {
   const { user } = useAuthStore();
-  const { orders, seedOrders, getAnalytics } = useOrderStore();
+  const {
+    orders,
+    seedOrders,
+    getAnalytics,
+    getDelayAnalytics,
+    getCancellationAnalytics,
+  } = useOrderStore();
   const { getStats: driverStats } = useDriverStore();
 
   useEffect(() => {
@@ -398,6 +404,8 @@ const AdminDashboard = () => {
   }, [seedOrders, user?.id]);
 
   const analytics = getAnalytics();
+  const delayAnalytics = getDelayAnalytics();
+  const cancellationAnalytics = getCancellationAnalytics();
   const dStats = driverStats();
   const recentOrders = [...orders]
     .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
@@ -516,6 +524,20 @@ const AdminDashboard = () => {
             color:
               "bg-red-50 dark:bg-red-900/20 text-red-800 dark:text-red-300 border border-red-100 dark:border-red-900/40",
           },
+          {
+            label: "Delayed",
+            value: delayAnalytics.delayedCount,
+            icon: "⏱️",
+            color:
+              "bg-rose-50 dark:bg-rose-900/20 text-rose-800 dark:text-rose-300 border border-rose-100 dark:border-rose-900/40",
+          },
+          {
+            label: "Avg Delay",
+            value: `${delayAnalytics.averageDelayMinutes} min`,
+            icon: "🚨",
+            color:
+              "bg-orange-50 dark:bg-orange-900/20 text-orange-800 dark:text-orange-300 border border-orange-100 dark:border-orange-900/40",
+          },
         ].map((s) => (
           <div key={s.label} className={`rounded-2xl p-4 ${s.color}`}>
             <div className="flex items-center justify-between">
@@ -558,6 +580,67 @@ const AdminDashboard = () => {
             Status Breakdown
           </h2>
           <DonutChart data={donutData} total={analytics.total} />
+        </Card>
+      </div>
+
+      <div className="grid lg:grid-cols-3 gap-5 mb-5">
+        <Card className="lg:col-span-2">
+          <h2 className="font-bold text-[#1a0a0a] dark:text-[#f8f8f8] mb-3">
+            Cancellation Analytics
+          </h2>
+          <div className="grid sm:grid-cols-3 gap-3 text-sm">
+            <div className="rounded-lg bg-red-50 dark:bg-red-900/20 p-3">
+              <p className="text-[#6b4040] dark:text-[#c9a97a]">
+                Cancelled Orders
+              </p>
+              <p className="text-xl font-black text-red-500">
+                {cancellationAnalytics.cancelledCount}
+              </p>
+            </div>
+            <div className="rounded-lg bg-amber-50 dark:bg-amber-900/20 p-3">
+              <p className="text-[#6b4040] dark:text-[#c9a97a]">
+                Cancel Attempts
+              </p>
+              <p className="text-xl font-black text-amber-600">
+                {cancellationAnalytics.totalAttempts}
+              </p>
+            </div>
+            <div className="rounded-lg bg-indigo-50 dark:bg-indigo-900/20 p-3">
+              <p className="text-[#6b4040] dark:text-[#c9a97a]">
+                Risky Customers
+              </p>
+              <p className="text-xl font-black text-indigo-600">
+                {cancellationAnalytics.riskyCustomers.length}
+              </p>
+            </div>
+          </div>
+        </Card>
+
+        <Card>
+          <h2 className="font-bold text-[#1a0a0a] dark:text-[#f8f8f8] mb-3">
+            Top Cancel Reasons
+          </h2>
+          <div className="space-y-2 text-sm">
+            {Object.entries(cancellationAnalytics.reasonCounts)
+              .sort((a, b) => b[1] - a[1])
+              .slice(0, 4)
+              .map(([reason, count]) => (
+                <p
+                  key={reason}
+                  className="flex items-center justify-between rounded-lg bg-[#f8f8f8] dark:bg-[#120606] px-3 py-2"
+                >
+                  <span className="text-[#6b4040] dark:text-[#c9a97a] truncate">
+                    {reason}
+                  </span>
+                  <span className="font-bold text-primary">{count}</span>
+                </p>
+              ))}
+            {Object.keys(cancellationAnalytics.reasonCounts).length === 0 && (
+              <p className="text-[#6b4040] dark:text-[#c9a97a]">
+                No cancellations yet.
+              </p>
+            )}
+          </div>
         </Card>
       </div>
 
@@ -680,6 +763,12 @@ const AdminDashboard = () => {
             </h2>
             <div className="space-y-2">
               {[
+                {
+                  label: "Live Tracking Center",
+                  to: "/admin/live-tracking",
+                  icon: "🛰️",
+                },
+                { label: "Demand Heatmap", to: "/admin/heatmap", icon: "🔥" },
                 { label: "Manage Orders", to: "/admin/orders", icon: "📋" },
                 { label: "Manage Drivers", to: "/admin/drivers", icon: "🚴" },
                 {

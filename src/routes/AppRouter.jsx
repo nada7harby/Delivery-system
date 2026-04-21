@@ -1,9 +1,10 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { useEffect } from "react";
 
-import { useAuthStore, useAppStore } from "@/store";
+import { useAuthStore, useAppStore, useTrackingStore } from "@/store";
 import ProtectedRoute from "./ProtectedRoute";
 import { ToastContainer } from "@/components";
+import { socket } from "@/services";
 
 // Auth pages
 import LoginPage from "@/pages/LoginPage";
@@ -32,6 +33,8 @@ import AdminOrdersPage from "@/pages/admin/AdminOrdersPage";
 import AdminOrderDetailPage from "@/pages/admin/AdminOrderDetailPage";
 import AdminDriversPage from "@/pages/admin/AdminDriversPage";
 import AdminCustomersPage from "@/pages/admin/AdminCustomersPage";
+import AdminLiveTrackingPage from "@/pages/admin/AdminLiveTrackingPage";
+import AdminHeatmapPage from "@/pages/admin/AdminHeatmapPage";
 
 // 404
 const NotFoundPage = () => (
@@ -52,11 +55,75 @@ const NotFoundPage = () => (
 
 const AppRouter = () => {
   const { isAuthenticated, user } = useAuthStore();
-  const { isDarkMode, initDarkMode } = useAppStore();
+  const { isDarkMode, initDarkMode, addToast } = useAppStore();
+  const {
+    bindRealtimeListeners,
+    unbindRealtimeListeners,
+    startDelayMonitoring,
+    stopDelayMonitoring,
+  } = useTrackingStore();
 
   useEffect(() => {
     initDarkMode(isDarkMode);
-  }, []);
+  }, [initDarkMode, isDarkMode]);
+
+  useEffect(() => {
+    socket.connect();
+    bindRealtimeListeners();
+    startDelayMonitoring();
+
+    return () => {
+      stopDelayMonitoring();
+      unbindRealtimeListeners();
+      socket.disconnect();
+    };
+  }, [
+    bindRealtimeListeners,
+    startDelayMonitoring,
+    stopDelayMonitoring,
+    unbindRealtimeListeners,
+  ]);
+
+  useEffect(() => {
+    const onOrderDelayed = (payload) => {
+      if (user?.role !== "admin") return;
+      addToast({
+        type: "warning",
+        title: `Delayed order ${payload.orderId}`,
+        message: "Attention required in live tracking center.",
+      });
+    };
+
+    const onOrderCancelled = (payload) => {
+      if (user?.role === "admin") {
+        addToast({
+          type: "info",
+          title: `Order cancelled ${payload.orderId}`,
+          message:
+            payload.cancelReason || "Cancellation detected in operations.",
+        });
+      }
+    };
+
+    const onHeatmapUpdated = () => {
+      if (user?.role !== "admin") return;
+      addToast({
+        type: "info",
+        title: "Heatmap refreshed",
+        message: "Demand visualization has new activity.",
+        duration: 2200,
+      });
+    };
+
+    socket.on("order-delayed", onOrderDelayed);
+    socket.on("order-cancelled", onOrderCancelled);
+    socket.on("heatmap-updated", onHeatmapUpdated);
+    return () => {
+      socket.off("order-delayed", onOrderDelayed);
+      socket.off("order-cancelled", onOrderCancelled);
+      socket.off("heatmap-updated", onHeatmapUpdated);
+    };
+  }, [addToast, user?.role]);
 
   return (
     <BrowserRouter>
@@ -219,6 +286,22 @@ const AppRouter = () => {
           element={
             <ProtectedRoute allowedRoles={["admin"]}>
               <AdminCustomersPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/live-tracking"
+          element={
+            <ProtectedRoute allowedRoles={["admin"]}>
+              <AdminLiveTrackingPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/heatmap"
+          element={
+            <ProtectedRoute allowedRoles={["admin"]}>
+              <AdminHeatmapPage />
             </ProtectedRoute>
           }
         />

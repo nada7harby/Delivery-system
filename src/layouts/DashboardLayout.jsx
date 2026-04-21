@@ -12,11 +12,17 @@ const DashboardLayout = ({ children, role = "driver" }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const { user, logout } = useAuthStore();
-  const { isDarkMode, toggleDarkMode, sidebarOpen, toggleSidebar } =
-    useAppStore();
+  const {
+    isDarkMode,
+    toggleDarkMode,
+    sidebarOpen,
+    toggleSidebar,
+  } = useAppStore();
 
   const adminNav = [
     { to: "/admin", label: "Dashboard", icon: "📊", exact: true },
+    { to: "/admin/live-tracking", label: "Live Tracking", icon: "🛰️" },
+    { to: "/admin/heatmap", label: "Heatmap", icon: "🔥" },
     { to: "/admin/orders", label: "All Orders", icon: "📋" },
     { to: "/admin/drivers", label: "Drivers", icon: "🚴" },
     { to: "/admin/customers", label: "Customers", icon: "👥" },
@@ -40,13 +46,17 @@ const DashboardLayout = ({ children, role = "driver" }) => {
       <aside
         className={clsx(
           "fixed inset-y-0 left-0 z-30 flex flex-col transition-all duration-300 bg-white dark:bg-[#120606] border-r border-[#E5D0AC] dark:border-[#3d1a1a] shadow-lg",
-          sidebarOpen ? "w-60" : "w-16"
+          sidebarOpen ? "w-60" : "w-16",
         )}
       >
         {/* Logo */}
         <div className="h-16 flex items-center px-4 border-b border-[#E5D0AC] dark:border-[#3d1a1a]">
           <div className="w-9 h-9 bg-gray-50 dark:bg-gray-800 rounded-xl flex items-center justify-center flex-shrink-0 overflow-hidden shadow-sm">
-            <img src="/src/assets/img/logo/logo.png" alt="Logo" className="w-6 h-6 object-contain" />
+            <img
+              src="/src/assets/img/logo/logo.png"
+              alt="Logo"
+              className="w-6 h-6 object-contain"
+            />
           </div>
           {sidebarOpen && (
             <span className="ml-2.5 font-display font-bold text-lg text-gradient truncate">
@@ -64,14 +74,12 @@ const DashboardLayout = ({ children, role = "driver" }) => {
               className={clsx(
                 "sidebar-link",
                 isActive(link) && "active",
-                !sidebarOpen && "justify-center px-2"
+                !sidebarOpen && "justify-center px-2",
               )}
               title={!sidebarOpen ? link.label : undefined}
             >
               <span className="text-lg flex-shrink-0">{link.icon}</span>
-              {sidebarOpen && (
-                <span className="truncate">{link.label}</span>
-              )}
+              {sidebarOpen && <span className="truncate">{link.label}</span>}
             </Link>
           ))}
         </nav>
@@ -81,7 +89,7 @@ const DashboardLayout = ({ children, role = "driver" }) => {
           <div
             className={clsx(
               "flex items-center gap-3",
-              !sidebarOpen && "justify-center"
+              !sidebarOpen && "justify-center",
             )}
           >
             <div className="w-9 h-9 bg-gradient-brand rounded-full flex items-center justify-center text-white font-bold flex-shrink-0">
@@ -113,7 +121,7 @@ const DashboardLayout = ({ children, role = "driver" }) => {
       <div
         className={clsx(
           "flex-1 flex flex-col transition-all duration-300",
-          sidebarOpen ? "ml-60" : "ml-16"
+          sidebarOpen ? "ml-60" : "ml-16",
         )}
       >
         {/* Top bar */}

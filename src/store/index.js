@@ -6,3 +6,4 @@ export { default as useAppStore } from "./appStore";
 export { default as useDriverStore } from "./driverStore";
 export { default as useWishlistStore } from "./wishlistStore";
 export { default as useMarketplaceStore } from "./marketplaceStore";
+export { default as useHeatmapStore } from "./heatmapStore";

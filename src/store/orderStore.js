@@ -11,10 +11,26 @@ import { selectBestDriver } from "@/utils/assignment";
 
 const ASSIGNMENT_RETRY_INTERVAL_MS = 5000;
 const DRIVER_RESPONSE_TIMEOUT_MS = 15000;
+const DEFAULT_EXPECTED_DELIVERY_MINUTES = 30;
+const CONDITIONAL_CANCELLATION_STATUSES = new Set([ORDER_STATUS.PREPARING]);
+const ALLOWED_CANCELLATION_STATUSES = new Set([
+  ORDER_STATUS.PENDING,
+  ORDER_STATUS.CONFIRMED,
+]);
 const DEFAULT_PICKUP_LOCATION = {
   lat: 40.7128,
   lng: -74.006,
   name: "Restaurant HQ",
+};
+
+const addMinutesToIso = (isoDate, minutes) =>
+  new Date(new Date(isoDate).getTime() + minutes * 60 * 1000).toISOString();
+
+const resolveRefundRate = (status) => {
+  if (status === ORDER_STATUS.PENDING) return 1;
+  if (status === ORDER_STATUS.CONFIRMED) return 0.8;
+  if (status === ORDER_STATUS.PREPARING) return 0.5;
+  return 0;
 };
 
 const retryTimers = new Map();
@@ -41,6 +57,8 @@ const useOrderStore = create(
     (set, get) => ({
       orders: [],
       assignmentStatusByOrder: {},
+      cancellationAttemptsByOrder: {},
+      cancellationHistory: [],
       isLoading: false,
       error: null,
 
@@ -62,6 +80,12 @@ const useOrderStore = create(
 
       // Create a new order
       createOrder: (orderData) => {
+        const now = new Date().toISOString();
+        const expectedMinutes =
+          orderData.expectedDeliveryMinutes ||
+          orderData.estimatedTime ||
+          DEFAULT_EXPECTED_DELIVERY_MINUTES;
+
         const order = {
           id: `ORD-${Date.now()}`,
           ...orderData,
@@ -73,12 +97,26 @@ const useOrderStore = create(
             address: orderData.customerAddress || "Customer address",
           },
           status: ORDER_STATUS.PENDING,
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
+          createdAt: now,
+          updatedAt: now,
+          assignedAt: null,
+          expectedDeliveryTime: addMinutesToIso(now, expectedMinutes),
+          actualDeliveryTime: null,
+          onTheWayAt: null,
+          isDelayed: false,
+          delayMinutes: 0,
+          delayReason: null,
+          riskFlags: [],
+          lastLocationUpdateAt: null,
+          cancelledAt: null,
+          cancelledBy: null,
+          cancelReason: null,
+          partialRefundAmount: 0,
+          cancellationAttemptCount: 0,
           timeline: [
             {
               status: ORDER_STATUS.PENDING,
-              timestamp: new Date().toISOString(),
+              timestamp: now,
               note: "Order placed",
             },
           ],
@@ -89,7 +127,8 @@ const useOrderStore = create(
           awaitingDriverResponse: false,
           rejectedDriverIds: [],
           rating: null,
-          estimatedTime: Math.floor(Math.random() * 20) + 25, // 25-45 min
+          estimatedTime:
+            orderData.estimatedTime || Math.floor(Math.random() * 20) + 25, // 25-45 min
         };
 
         set({ orders: [...get().orders, order] });
@@ -106,6 +145,11 @@ const useOrderStore = create(
         socket.emit("order-created", {
           orderId: order.id,
           customerId: order.customerId,
+        });
+        socket.emit("heatmap-updated", {
+          reason: "order-created",
+          orderId: order.id,
+          timestamp: now,
         });
 
         get().runSmartAssignment(order.id, { trigger: "order-created" });
@@ -139,19 +183,71 @@ const useOrderStore = create(
         if (newStatus === ORDER_STATUS.ON_THE_WAY) estimatedTime = 10;
         if (newStatus === ORDER_STATUS.DELIVERED) estimatedTime = 0;
 
+        const now = new Date().toISOString();
+        const onTheWayAt =
+          newStatus === ORDER_STATUS.ON_THE_WAY
+            ? order.onTheWayAt || now
+            : order.onTheWayAt;
+        const actualDeliveryTime =
+          newStatus === ORDER_STATUS.DELIVERED ? now : order.actualDeliveryTime;
+        const isCancellation = newStatus === ORDER_STATUS.CANCELLED;
+        const refundRate = resolveRefundRate(order.status);
+        const partialRefundAmount = isCancellation
+          ? Number((order.total || 0) * refundRate)
+          : order.partialRefundAmount;
+
         set({
           orders: orders.map((o) =>
             o.id === orderId
               ? {
                   ...o,
                   status: newStatus,
-                  updatedAt: new Date().toISOString(),
+                  updatedAt: now,
                   timeline,
                   estimatedTime,
+                  onTheWayAt,
+                  actualDeliveryTime,
+                  isDelayed:
+                    newStatus === ORDER_STATUS.DELIVERED ||
+                    newStatus === ORDER_STATUS.CANCELLED
+                      ? false
+                      : o.isDelayed,
+                  cancelledAt: isCancellation ? now : o.cancelledAt,
+                  cancelledBy: isCancellation
+                    ? o.cancelledBy || "system"
+                    : o.cancelledBy,
+                  cancelReason: isCancellation
+                    ? o.cancelReason || note || "Order cancelled"
+                    : o.cancelReason,
+                  partialRefundAmount,
                 }
               : o,
           ),
         });
+
+        socket.emit("order-status-update", {
+          orderId,
+          status: newStatus,
+          updatedAt: now,
+        });
+
+        if (isCancellation) {
+          socket.emit("order-cancelled", {
+            orderId,
+            statusBeforeCancellation: order.status,
+            cancelledAt: now,
+            cancelledBy: order.cancelledBy || "system",
+            cancelReason: order.cancelReason || note || "Order cancelled",
+            driverId: order.driverId,
+            customerId: order.customerId,
+            partialRefundAmount,
+          });
+          socket.emit("heatmap-updated", {
+            reason: "order-cancelled",
+            orderId,
+            timestamp: now,
+          });
+        }
 
         if (
           newStatus === ORDER_STATUS.DELIVERED ||
@@ -233,6 +329,8 @@ const useOrderStore = create(
 
         const now = new Date().toISOString();
         const wasPending = order.status === ORDER_STATUS.PENDING;
+        const expectedMinutes =
+          order.estimatedTime || DEFAULT_EXPECTED_DELIVERY_MINUTES;
 
         set((state) => ({
           orders: state.orders.map((o) => {
@@ -262,6 +360,9 @@ const useOrderStore = create(
                 vehicleType: bestDriver.vehicleType,
                 rating: bestDriver.rating,
               },
+              assignedAt: o.assignedAt || now,
+              expectedDeliveryTime:
+                o.expectedDeliveryTime || addMinutesToIso(now, expectedMinutes),
               autoAssigned: options.manual ? false : true,
               assignmentScore: bestDriver.assignmentScore,
               awaitingDriverResponse: true,
@@ -321,6 +422,8 @@ const useOrderStore = create(
         useDriverStore.getState().assignOrderToDriver(driverId);
 
         const now = new Date().toISOString();
+        const expectedMinutes =
+          order.estimatedTime || DEFAULT_EXPECTED_DELIVERY_MINUTES;
         set((state) => ({
           orders: state.orders.map((o) =>
             o.id === orderId
@@ -334,6 +437,10 @@ const useOrderStore = create(
                     vehicleType: driver.vehicleType,
                     rating: driver.rating,
                   },
+                  assignedAt: o.assignedAt || now,
+                  expectedDeliveryTime:
+                    o.expectedDeliveryTime ||
+                    addMinutesToIso(now, expectedMinutes),
                   status: ORDER_STATUS.CONFIRMED,
                   updatedAt: now,
                   awaitingDriverResponse: false,
@@ -444,6 +551,15 @@ const useOrderStore = create(
                   driver: null,
                   assignmentScore: null,
                   awaitingDriverResponse: false,
+                  assignedAt: null,
+                  expectedDeliveryTime: addMinutesToIso(
+                    now,
+                    o.estimatedTime || DEFAULT_EXPECTED_DELIVERY_MINUTES,
+                  ),
+                  isDelayed: false,
+                  delayMinutes: 0,
+                  delayReason: null,
+                  riskFlags: [],
                   rejectedDriverIds: [
                     ...new Set([...(o.rejectedDriverIds || []), driverId]),
                   ],
@@ -519,12 +635,196 @@ const useOrderStore = create(
       },
 
       // Cancel order
-      cancelOrder: (orderId) => {
-        return get().updateOrderStatus(
+      cancelOrder: (orderId, options = {}) => {
+        return get().requestOrderCancellation(orderId, {
+          actorRole: options.actorRole || "system",
+          actorId: options.actorId || null,
+          reason: options.reason || "Order cancelled",
+          acknowledgePreparing: Boolean(options.acknowledgePreparing),
+          isAdminOverride: Boolean(options.isAdminOverride),
+        });
+      },
+
+      canCancelOrder: (order, options = {}) => {
+        if (!order) {
+          return {
+            allowed: false,
+            requiresWarning: false,
+            message: "Order not found",
+          };
+        }
+
+        if (order.status === ORDER_STATUS.CANCELLED) {
+          return {
+            allowed: false,
+            requiresWarning: false,
+            message: "Order is already cancelled",
+          };
+        }
+
+        const isAdminOverride = Boolean(options.isAdminOverride);
+        const actorRole = options.actorRole || "customer";
+
+        if (isAdminOverride || actorRole === "admin") {
+          return {
+            allowed: true,
+            requiresWarning: false,
+            message: "Admin override cancellation",
+          };
+        }
+
+        if (ALLOWED_CANCELLATION_STATUSES.has(order.status)) {
+          return {
+            allowed: true,
+            requiresWarning: false,
+            message: "Cancellation allowed",
+          };
+        }
+
+        if (CONDITIONAL_CANCELLATION_STATUSES.has(order.status)) {
+          return {
+            allowed: true,
+            requiresWarning: true,
+            message: "Your order is being prepared",
+          };
+        }
+
+        return {
+          allowed: false,
+          requiresWarning: false,
+          message: "Order cannot be cancelled at this stage",
+        };
+      },
+
+      requestOrderCancellation: (orderId, options = {}) => {
+        const order = get().getOrderById(orderId);
+        if (!order) return { success: false, error: "Order not found" };
+
+        const actorRole = options.actorRole || "customer";
+        const actorId = options.actorId || null;
+        const reason = options.reason || "Cancelled by user";
+        const isAdminOverride = Boolean(options.isAdminOverride);
+        const decision = get().canCancelOrder(order, {
+          actorRole,
+          isAdminOverride,
+        });
+
+        const attemptTimestamp = new Date().toISOString();
+        set((state) => ({
+          cancellationAttemptsByOrder: {
+            ...state.cancellationAttemptsByOrder,
+            [orderId]:
+              Number(state.cancellationAttemptsByOrder[orderId] || 0) + 1,
+          },
+          cancellationHistory: [
+            {
+              id: `cancel-attempt-${Date.now()}`,
+              orderId,
+              statusAtAttempt: order.status,
+              actorRole,
+              actorId,
+              reason,
+              allowed: decision.allowed,
+              attemptedAt: attemptTimestamp,
+            },
+            ...state.cancellationHistory,
+          ].slice(0, 150),
+        }));
+
+        if (!decision.allowed) {
+          return { success: false, error: decision.message };
+        }
+
+        if (
+          decision.requiresWarning &&
+          !options.acknowledgePreparing &&
+          !isAdminOverride
+        ) {
+          return {
+            success: false,
+            requiresWarning: true,
+            error: decision.message,
+          };
+        }
+
+        const now = new Date().toISOString();
+        const refundRate = resolveRefundRate(order.status);
+        const partialRefundAmount = Number((order.total || 0) * refundRate);
+
+        set((state) => ({
+          orders: state.orders.map((candidate) =>
+            candidate.id !== orderId
+              ? candidate
+              : {
+                  ...candidate,
+                  status: ORDER_STATUS.CANCELLED,
+                  updatedAt: now,
+                  isDelayed: false,
+                  cancelledAt: now,
+                  cancelledBy: actorRole,
+                  cancelReason: reason,
+                  partialRefundAmount,
+                  cancellationAttemptCount: Number(
+                    state.cancellationAttemptsByOrder[orderId] || 0,
+                  ),
+                  timeline: [
+                    ...candidate.timeline,
+                    {
+                      status: ORDER_STATUS.CANCELLED,
+                      timestamp: now,
+                      note: `${reason}${
+                        actorRole === "admin" ? " (admin override)" : ""
+                      }`,
+                    },
+                  ],
+                },
+          ),
+        }));
+
+        clearRetryTimer(orderId);
+        clearDriverResponseTimer(orderId);
+        if (order.driverId) {
+          useDriverStore.getState().releaseOrderFromDriver(order.driverId);
+        }
+
+        get().setAssignmentStatus(orderId, {
+          state: "cancelled",
+          message: `Cancelled: ${reason}`,
+        });
+
+        socket.emit("order-status-update", {
           orderId,
-          ORDER_STATUS.CANCELLED,
-          "Order cancelled",
-        );
+          status: ORDER_STATUS.CANCELLED,
+          updatedAt: now,
+        });
+        socket.emit("order-cancelled", {
+          orderId,
+          statusBeforeCancellation: order.status,
+          cancelledAt: now,
+          cancelledBy: actorRole,
+          cancelReason: reason,
+          driverId: order.driverId,
+          customerId: order.customerId,
+          partialRefundAmount,
+        });
+        socket.emit("heatmap-updated", {
+          reason: "order-cancelled",
+          orderId,
+          timestamp: now,
+        });
+
+        useDriverStore.getState().syncActiveOrderCounts(get().orders);
+
+        return {
+          success: true,
+          partialRefundAmount,
+          message:
+            partialRefundAmount > 0
+              ? `Cancellation completed. Refund: $${partialRefundAmount.toFixed(
+                  2,
+                )}`
+              : "Cancellation completed",
+        };
       },
 
       // Get order by id
@@ -547,6 +847,75 @@ const useOrderStore = create(
             o.status !== ORDER_STATUS.DELIVERED &&
             o.status !== ORDER_STATUS.CANCELLED,
         ),
+
+      updateTrackingMeta: (orderId, patch) => {
+        set((state) => ({
+          orders: state.orders.map((o) =>
+            o.id === orderId
+              ? {
+                  ...o,
+                  ...patch,
+                  updatedAt: patch.updatedAt || o.updatedAt,
+                }
+              : o,
+          ),
+        }));
+      },
+
+      getDelayedOrders: () => get().orders.filter((o) => o.isDelayed),
+
+      getDelayAnalytics: () => {
+        const delayedOrders = get().orders.filter((o) => o.isDelayed);
+        const totalDelay = delayedOrders.reduce(
+          (sum, order) => sum + Number(order.delayMinutes || 0),
+          0,
+        );
+
+        return {
+          delayedCount: delayedOrders.length,
+          averageDelayMinutes:
+            delayedOrders.length > 0
+              ? Math.round(totalDelay / delayedOrders.length)
+              : 0,
+        };
+      },
+
+      getCancellationAnalytics: () => {
+        const { orders, cancellationHistory } = get();
+        const cancelledOrders = orders.filter(
+          (order) => order.status === ORDER_STATUS.CANCELLED,
+        );
+
+        const reasonCounts = cancelledOrders.reduce((acc, order) => {
+          const reason = order.cancelReason || "Unspecified";
+          acc[reason] = (acc[reason] || 0) + 1;
+          return acc;
+        }, {});
+
+        const cancelledByCounts = cancelledOrders.reduce((acc, order) => {
+          const key = order.cancelledBy || "unknown";
+          acc[key] = (acc[key] || 0) + 1;
+          return acc;
+        }, {});
+
+        const frequentCustomers = cancelledOrders.reduce((acc, order) => {
+          const customerKey =
+            order.customerId || order.customerName || "unknown";
+          acc[customerKey] = (acc[customerKey] || 0) + 1;
+          return acc;
+        }, {});
+
+        return {
+          cancelledCount: cancelledOrders.length,
+          totalAttempts: cancellationHistory.length,
+          reasonCounts,
+          cancelledByCounts,
+          riskyCustomers: Object.entries(frequentCustomers)
+            .filter(([, count]) => count >= 2)
+            .map(([customerId, count]) => ({ customerId, count }))
+            .sort((a, b) => b.count - a.count),
+        };
+      },
 
       // Filter orders by status
       getOrdersByStatus: (status) =>
@@ -598,6 +967,21 @@ const useOrderStore = create(
             createdAt: new Date(Date.now() - 3600000 * 24).toISOString(),
             updatedAt: new Date(Date.now() - 3600000 * 22).toISOString(),
             driverId: "d1",
+            assignedAt: new Date(Date.now() - 3600000 * 23.8).toISOString(),
+            expectedDeliveryTime: new Date(
+              Date.now() - 3600000 * 22.4,
+            ).toISOString(),
+            actualDeliveryTime: new Date(
+              Date.now() - 3600000 * 22,
+            ).toISOString(),
+            onTheWayAt: new Date(Date.now() - 3600000 * 22.3).toISOString(),
+            isDelayed: false,
+            delayMinutes: 0,
+            delayReason: null,
+            riskFlags: [],
+            lastLocationUpdateAt: new Date(
+              Date.now() - 3600000 * 22.1,
+            ).toISOString(),
             driver: {
               id: "d1",
               name: "Ahmed Driver",
@@ -657,6 +1041,15 @@ const useOrderStore = create(
             createdAt: new Date(Date.now() - 1800000).toISOString(),
             updatedAt: new Date(Date.now() - 600000).toISOString(),
             driverId: "d2",
+            assignedAt: new Date(Date.now() - 1500000).toISOString(),
+            expectedDeliveryTime: new Date(Date.now() - 300000).toISOString(),
+            actualDeliveryTime: null,
+            onTheWayAt: new Date(Date.now() - 600000).toISOString(),
+            isDelayed: true,
+            delayMinutes: 5,
+            delayReason: "ETA passed",
+            riskFlags: [],
+            lastLocationUpdateAt: new Date(Date.now() - 10000).toISOString(),
             driver: {
               id: "d2",
               name: "Maria Garcia",
@@ -707,6 +1100,8 @@ const useOrderStore = create(
       partialize: (state) => ({
         orders: state.orders,
         assignmentStatusByOrder: state.assignmentStatusByOrder,
+        cancellationAttemptsByOrder: state.cancellationAttemptsByOrder,
+        cancellationHistory: state.cancellationHistory,
       }),
     },
   ),

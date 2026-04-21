@@ -5,6 +5,7 @@ import {
   useAuthStore,
   useAppStore,
   useDriverStore,
+  useTrackingStore,
 } from "@/store";
 import { DashboardLayout } from "@/layouts";
 import { Card, Badge, Button } from "@/components";
@@ -21,7 +22,9 @@ const DriverDashboard = () => {
     setOnlineStatus,
     getDriverByUser,
     setStatus,
+    getDriverById,
   } = useDriverStore();
+  const { upsertDriverLocation, delayedOrderIds } = useTrackingStore();
 
   const loggedDriver = getDriverByUser(user);
 
@@ -39,8 +42,23 @@ const DriverDashboard = () => {
       });
     };
 
+    const onOrderCancelled = (payload) => {
+      if (!payload?.driverId || payload.driverId !== loggedDriver?.id) return;
+      addToast({
+        type: "warning",
+        title: "Order cancelled",
+        message: `Order ${payload.orderId} was cancelled by ${
+          payload.cancelledBy || "ops"
+        }.`,
+      });
+    };
+
     socket.on("driver-assigned", onDriverAssigned);
-    return () => socket.off("driver-assigned", onDriverAssigned);
+    socket.on("order-cancelled", onOrderCancelled);
+    return () => {
+      socket.off("driver-assigned", onDriverAssigned);
+      socket.off("order-cancelled", onOrderCancelled);
+    };
   }, [addToast, loggedDriver?.id]);
 
   const myOrders = useMemo(
@@ -74,6 +92,53 @@ const DriverDashboard = () => {
     (sum, o) => sum + o.total * 0.15,
     0,
   ); // 15% commission mock
+
+  const delayedMyOrders = activeOrders.filter((order) =>
+    delayedOrderIds.includes(order.id),
+  );
+
+  useEffect(() => {
+    if (!isOnline || !loggedDriver?.id) return;
+
+    const interval = setInterval(() => {
+      const freshDriver = getDriverById(loggedDriver.id);
+      if (!freshDriver) return;
+
+      const movingOrder = activeOrders.find((order) => order.deliveryLocation);
+      const current = freshDriver.currentLocation || {
+        lat: freshDriver.lat,
+        lng: freshDriver.lng,
+      };
+
+      let nextLocation = current;
+      if (movingOrder?.deliveryLocation) {
+        const target = movingOrder.deliveryLocation;
+        nextLocation = {
+          lat: current.lat + (target.lat - current.lat) * 0.12,
+          lng: current.lng + (target.lng - current.lng) * 0.12,
+        };
+      } else {
+        nextLocation = {
+          lat: current.lat + (Math.random() - 0.5) * 0.0015,
+          lng: current.lng + (Math.random() - 0.5) * 0.0015,
+        };
+      }
+
+      upsertDriverLocation({
+        driverId: loggedDriver.id,
+        lat: nextLocation.lat,
+        lng: nextLocation.lng,
+      });
+    }, 5000);
+
+    return () => clearInterval(interval);
+  }, [
+    activeOrders,
+    getDriverById,
+    isOnline,
+    loggedDriver?.id,
+    upsertDriverLocation,
+  ]);
 
   const stats = [
     {
@@ -177,6 +242,15 @@ const DriverDashboard = () => {
           </Card>
         ))}
       </div>
+
+      {delayedMyOrders.length > 0 && (
+        <Card className="mb-8 border border-amber-200 bg-amber-50 dark:border-amber-900/40 dark:bg-amber-900/20">
+          <p className="font-bold text-amber-700 dark:text-amber-300">
+            You are running late on {delayedMyOrders.length} order(s). Please
+            prioritize these deliveries.
+          </p>
+        </Card>
+      )}
 
       {!isOnline && (
         <Card className="mb-8 border-dashed border-2 border-gray-200 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-900/20 text-center py-12">

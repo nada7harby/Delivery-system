@@ -15,12 +15,7 @@ import {
   Modal,
   MapSimulation,
 } from "@/components";
-import {
-  ORDER_STATUS,
-  STATUS_LABELS,
-  STATUS_TRANSITIONS,
-  canTransition,
-} from "@/constants";
+import { ORDER_STATUS, STATUS_LABELS, STATUS_TRANSITIONS } from "@/constants";
 
 const AdminOrderDetailPage = () => {
   const { id } = useParams();
@@ -29,9 +24,9 @@ const AdminOrderDetailPage = () => {
     getOrderById,
     updateOrderStatus,
     assignDriverByAdmin,
-    cancelOrder,
+    requestOrderCancellation,
   } = useOrderStore();
-  const { drivers, getAvailableDrivers } = useDriverStore();
+  const { drivers } = useDriverStore();
   const { addToast } = useAppStore();
   const {
     addNotification,
@@ -42,8 +37,10 @@ const AdminOrderDetailPage = () => {
 
   const [showAssignDriver, setShowAssignDriver] = useState(false);
   const [showForceStatus, setShowForceStatus] = useState(false);
+  const [showCancelModal, setShowCancelModal] = useState(false);
   const [selectedDriver, setSelectedDriver] = useState("");
   const [targetStatus, setTargetStatus] = useState("");
+  const [cancelReason, setCancelReason] = useState("Operational decision");
   const [isUpdating, setIsUpdating] = useState(false);
 
   const order = getOrderById(id);
@@ -114,9 +111,19 @@ const AdminOrderDetailPage = () => {
   const handleCancel = async () => {
     setIsUpdating(true);
     await new Promise((r) => setTimeout(r, 400));
-    const result = cancelOrder(order.id);
+    const result = requestOrderCancellation(order.id, {
+      actorRole: "admin",
+      actorId: "admin-panel",
+      reason: cancelReason,
+      isAdminOverride: true,
+    });
     if (result.success) {
-      addToast({ type: "info", title: "Order cancelled" });
+      addToast({
+        type: "info",
+        title: "Order cancelled",
+        message: result.message,
+      });
+      setShowCancelModal(false);
     } else {
       addToast({
         type: "error",
@@ -367,16 +374,28 @@ const AdminOrderDetailPage = () => {
                       Force → {STATUS_LABELS[allowedNextStatuses[0]]}
                     </Button>
                   )}
-                {canTransition(order.status, ORDER_STATUS.CANCELLED) && (
+                {order.status !== ORDER_STATUS.CANCELLED && (
                   <Button
                     variant="danger"
                     size="sm"
                     className="w-full"
                     loading={isUpdating}
-                    onClick={handleCancel}
+                    onClick={() => setShowCancelModal(true)}
                   >
                     Cancel Order
                   </Button>
+                )}
+                {order.status === ORDER_STATUS.CANCELLED && (
+                  <div className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-xs text-red-700 dark:border-red-900/40 dark:bg-red-900/20 dark:text-red-300">
+                    <p>Reason: {order.cancelReason || "No reason provided"}</p>
+                    <p>Cancelled by: {order.cancelledBy || "system"}</p>
+                    {typeof order.partialRefundAmount === "number" && (
+                      <p>
+                        Refund simulation: $
+                        {order.partialRefundAmount.toFixed(2)}
+                      </p>
+                    )}
+                  </div>
                 )}
                 {order.status === ORDER_STATUS.DELIVERED && (
                   <div className="text-center text-emerald-600 dark:text-emerald-400 font-bold py-2">
@@ -514,6 +533,47 @@ const AdminOrderDetailPage = () => {
                 <Badge status={status} />
               </button>
             ))}
+        </div>
+      </Modal>
+
+      <Modal
+        isOpen={showCancelModal}
+        onClose={() => setShowCancelModal(false)}
+        title="Admin Cancellation Override"
+        footer={
+          <>
+            <Button variant="ghost" onClick={() => setShowCancelModal(false)}>
+              Back
+            </Button>
+            <Button
+              variant="danger"
+              loading={isUpdating}
+              onClick={handleCancel}
+            >
+              Confirm Override
+            </Button>
+          </>
+        }
+      >
+        <div className="space-y-3">
+          <p className="text-sm text-[#6b4040] dark:text-[#c9a97a]">
+            Admin can cancel any order with override. Add a clear reason for
+            audit trail.
+          </p>
+          <label className="block text-xs font-semibold text-[#6b4040] dark:text-[#c9a97a]">
+            Cancellation reason
+          </label>
+          <select
+            value={cancelReason}
+            onChange={(event) => setCancelReason(event.target.value)}
+            className="input"
+          >
+            <option>Operational decision</option>
+            <option>Customer support escalation</option>
+            <option>Driver unavailable</option>
+            <option>Fraud prevention</option>
+            <option>Inventory issue</option>
+          </select>
         </div>
       </Modal>
     </DashboardLayout>
