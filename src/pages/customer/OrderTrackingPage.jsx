@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useParams, Link } from "react-router-dom";
+import { motion as Motion } from "framer-motion";
+import { Bike, Clock3, MapPinned } from "lucide-react";
 import {
   useOrderStore,
   useTrackingStore,
@@ -211,7 +213,11 @@ const OrderTrackingPage = () => {
     <CustomerLayout>
       <div className="max-w-4xl mx-auto">
         {/* Header */}
-        <div className="flex items-start justify-between mb-6 gap-4">
+        <Motion.div
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="flex items-start justify-between mb-6 gap-4"
+        >
           <div>
             <div className="flex items-center gap-2 mb-1">
               <Link
@@ -229,23 +235,23 @@ const OrderTrackingPage = () => {
             </p>
           </div>
           <Badge status={order.status} />
-        </div>
+        </Motion.div>
 
         <div className="grid lg:grid-cols-3 gap-6">
           {/* Left col */}
           <div className="lg:col-span-2 space-y-5">
             {/* Map */}
-            <Card padding="p-0" className="overflow-hidden">
+            <Card padding="p-0" className="overflow-hidden rounded-2xl">
               <div className="px-5 pt-4 pb-3 flex items-center justify-between border-b border-[#E5D0AC] dark:border-[#3d1a1a]">
                 <h2 className="font-bold text-[#1a0a0a] dark:text-[#f8f8f8] flex items-center gap-2">
-                  📍 Live Tracking
+                  <MapPinned size={17} /> Live Tracking
                   {isLive && isTracking && (
                     <span className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse inline-block" />
                   )}
                 </h2>
                 {eta !== null && isLive && (
                   <div className="bg-primary/10 text-primary rounded-lg px-3 py-1.5 text-sm font-bold">
-                    ⏱ {eta} min ETA
+                    <Clock3 size={14} className="inline mr-1" /> {eta} min ETA
                   </div>
                 )}
               </div>
@@ -341,7 +347,7 @@ const OrderTrackingPage = () => {
             {order.driver && (
               <Card>
                 <h2 className="font-bold text-[#1a0a0a] dark:text-[#f8f8f8] mb-3 flex items-center gap-2">
-                  🛵 Your Driver
+                  <Bike size={17} /> Your Driver
                 </h2>
                 {order.awaitingDriverResponse && (
                   <div className="mb-3 text-xs px-2.5 py-1.5 rounded-lg bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-300 font-semibold">

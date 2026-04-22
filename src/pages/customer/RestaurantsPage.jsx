@@ -1,5 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
+import { motion as Motion } from "framer-motion";
+import { Compass, Filter, Search, Sparkles, Star } from "lucide-react";
 import { useMarketplaceStore, useCartStore, useAppStore } from "@/store";
 import { CustomerLayout } from "@/layouts";
 import {
@@ -12,7 +14,7 @@ import {
 import { RESTAURANT_CATEGORIES } from "@/constants";
 
 const RestaurantSkeleton = () => (
-  <div className="rounded-2xl overflow-hidden border border-gray-100 dark:border-gray-800 bg-white dark:bg-[#1a0a0a] animate-pulse">
+  <div className="rounded-3xl overflow-hidden border border-[#E5D0AC]/70 dark:border-[#3d1a1a] bg-white dark:bg-[#1a0a0a] animate-pulse">
     <div className="h-44 bg-gray-200 dark:bg-gray-800" />
     <div className="p-4 space-y-3">
       <div className="h-4 bg-gray-200 dark:bg-gray-800 rounded w-3/4" />
@@ -22,6 +24,13 @@ const RestaurantSkeleton = () => (
     </div>
   </div>
 );
+
+const fadeInUp = {
+  initial: { opacity: 0, y: 16 },
+  whileInView: { opacity: 1, y: 0 },
+  viewport: { once: true, amount: 0.2 },
+  transition: { duration: 0.35 },
+};
 
 const RestaurantsPage = () => {
   const {
@@ -43,7 +52,7 @@ const RestaurantsPage = () => {
   const loadMoreRef = useRef(null);
 
   useEffect(() => {
-    const timer = setTimeout(() => setIsLoading(false), 700);
+    const timer = setTimeout(() => setIsLoading(false), 650);
     return () => clearTimeout(timer);
   }, []);
 
@@ -53,36 +62,36 @@ const RestaurantsPage = () => {
 
     const observer = new IntersectionObserver(
       (entries) => {
-        const [entry] = entries;
-        if (entry.isIntersecting) {
-          setVisibleCount((count) => count + 4);
-        }
+        if (!entries[0].isIntersecting) return;
+        setVisibleCount((count) => count + 4);
       },
-      { threshold: 0.2 },
+      { threshold: 0.15 },
     );
 
     observer.observe(target);
     return () => observer.disconnect();
-  }, [loadMoreRef.current]);
+  }, []);
 
   const filteredRestaurants = useMemo(() => {
-    const list = restaurants
+    return restaurants
       .filter((restaurant) => {
+        const normalizedSearch = search.toLowerCase();
         const matchesSearch =
           !search ||
-          restaurant.name.toLowerCase().includes(search.toLowerCase()) ||
-          restaurant.location.toLowerCase().includes(search.toLowerCase());
+          restaurant.name.toLowerCase().includes(normalizedSearch) ||
+          (restaurant.location || "").toLowerCase().includes(normalizedSearch);
+
         const matchesCategory =
           category === "All" || restaurant.category === category;
-        return matchesSearch && matchesCategory;
+
+        const isVisible = restaurant.isActive ?? true;
+        return matchesSearch && matchesCategory && isVisible;
       })
       .sort((a, b) => {
         if (sortBy === "delivery") return a.deliveryTime - b.deliveryTime;
         if (sortBy === "name") return a.name.localeCompare(b.name);
         return b.rating - a.rating;
       });
-
-    return list;
   }, [restaurants, search, category, sortBy]);
 
   const displayedRestaurants = filteredRestaurants.slice(0, visibleCount);
@@ -97,40 +106,60 @@ const RestaurantsPage = () => {
     (restaurant) => restaurant.id === cartRestaurantId,
   );
 
+  const handleFavoriteToggle = (restaurantId) => {
+    const added = toggleFavoriteRestaurant(restaurantId);
+    addToast({
+      type: added ? "success" : "info",
+      title: added ? "Added to favorites" : "Removed from favorites",
+    });
+  };
+
   return (
     <CustomerLayout>
-      <section className="max-w-7xl mx-auto px-4 py-8 lg:py-10">
-        <div className="rounded-3xl p-6 lg:p-8 bg-gradient-to-br from-[#fff7e8] via-[#fbe5c1] to-[#f2d39f] dark:from-[#2e1010] dark:via-[#3a1515] dark:to-[#4a1919]">
-          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#9e7272] dark:text-[#c9a97a]">
-            Marketplace
+      <section className="max-w-7xl mx-auto px-4 py-8 lg:py-10 space-y-8">
+        <Motion.div
+          initial={{ opacity: 0, y: 18 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.35 }}
+          className="relative overflow-hidden rounded-[2rem] p-6 lg:p-8 bg-gradient-to-br from-[#fff9ea] via-[#ffe6bb] to-[#f6c786] dark:from-[#2a1010] dark:via-[#3a1515] dark:to-[#4a1919]"
+        >
+          <div className="absolute -top-20 -right-12 h-56 w-56 rounded-full bg-white/30 blur-2xl" />
+          <p className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.2em] text-[#9e7272] dark:text-[#c9a97a]">
+            <Sparkles size={14} /> Marketplace
           </p>
           <h1 className="font-display text-3xl lg:text-5xl font-black text-[#1a0a0a] dark:text-white mt-2">
-            Discover Restaurants Near You
+            Your Next Meal, Curated
           </h1>
           <p className="text-sm lg:text-base mt-3 text-[#6b4040] dark:text-[#e3c9b0] max-w-2xl">
-            Browse local favorites, compare ratings and delivery time, and order
-            from the restaurant you love.
+            Compare delivery time, discover local gems, and place your order in
+            a few taps.
           </p>
 
           <div className="mt-6 grid md:grid-cols-[1fr_auto_auto] gap-3">
-            <input
-              type="text"
-              value={search}
-              onChange={(event) => setSearch(event.target.value)}
-              placeholder="Search restaurant or area"
-              className="input"
-            />
-            <select
-              value={category}
-              onChange={(event) => setCategory(event.target.value)}
-              className="input"
-            >
-              {RESTAURANT_CATEGORIES.map((item) => (
-                <option key={item} value={item}>
-                  {item}
-                </option>
-              ))}
-            </select>
+            <label className="input flex items-center gap-2">
+              <Search size={16} className="text-[#9e7272]" />
+              <input
+                type="text"
+                value={search}
+                onChange={(event) => setSearch(event.target.value)}
+                placeholder="Search restaurant or area"
+                className="w-full bg-transparent outline-none"
+              />
+            </label>
+            <label className="input flex items-center gap-2">
+              <Filter size={15} className="text-[#9e7272]" />
+              <select
+                value={category}
+                onChange={(event) => setCategory(event.target.value)}
+                className="w-full bg-transparent outline-none"
+              >
+                {RESTAURANT_CATEGORIES.map((item) => (
+                  <option key={item} value={item}>
+                    {item}
+                  </option>
+                ))}
+              </select>
+            </label>
             <CustomSelect
               value={sortBy}
               onChange={setSortBy}
@@ -142,37 +171,41 @@ const RestaurantsPage = () => {
               ]}
             />
           </div>
-        </div>
+        </Motion.div>
 
         {showRestaurantContext && (
-          <Card className="mt-5 border-primary/20">
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-              <div>
-                <p className="text-xs uppercase tracking-widest text-[#9e7272]">
-                  Cart Active
-                </p>
-                <p className="font-semibold text-[#1a0a0a] dark:text-[#f8f8f8]">
-                  You have {getItemCount()} item(s) from{" "}
-                  {cartRestaurant?.name || "another restaurant"}
-                </p>
+          <Motion.div {...fadeInUp}>
+            <Card className="border-primary/20">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                <div>
+                  <p className="text-xs uppercase tracking-widest text-[#9e7272]">
+                    Cart Active
+                  </p>
+                  <p className="font-semibold text-[#1a0a0a] dark:text-[#f8f8f8]">
+                    You have {getItemCount()} item(s) from{" "}
+                    {cartRestaurant?.name || "another restaurant"}
+                  </p>
+                </div>
+                <Link
+                  to={
+                    cartRestaurantId
+                      ? `/restaurant/${cartRestaurantId}`
+                      : "/cart"
+                  }
+                >
+                  <Button variant="primary" size="sm">
+                    Continue order
+                  </Button>
+                </Link>
               </div>
-              <Link
-                to={
-                  cartRestaurantId ? `/restaurant/${cartRestaurantId}` : "/cart"
-                }
-              >
-                <Button variant="primary" size="sm">
-                  Continue order
-                </Button>
-              </Link>
-            </div>
-          </Card>
+            </Card>
+          </Motion.div>
         )}
 
         {favoriteRestaurants.length > 0 && (
-          <section className="mt-8">
-            <h2 className="font-bold text-[#1a0a0a] dark:text-[#f8f8f8] mb-3">
-              Favorites ❤️
+          <Motion.section {...fadeInUp}>
+            <h2 className="inline-flex items-center gap-2 font-bold text-[#1a0a0a] dark:text-[#f8f8f8] mb-3">
+              <Compass size={16} /> Favorites
             </h2>
             <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
               {favoriteRestaurants.slice(0, 4).map((restaurant) => (
@@ -180,18 +213,15 @@ const RestaurantsPage = () => {
                   key={restaurant.id}
                   restaurant={restaurant}
                   isFavorite
-                  onToggleFavorite={(restaurantId) => {
-                    toggleFavoriteRestaurant(restaurantId);
-                    addToast({ type: "info", title: "Removed from favorites" });
-                  }}
+                  onToggleFavorite={handleFavoriteToggle}
                 />
               ))}
             </div>
-          </section>
+          </Motion.section>
         )}
 
         {recentlyViewedRestaurants.length > 0 && (
-          <section className="mt-8">
+          <Motion.section {...fadeInUp}>
             <h2 className="font-bold text-[#1a0a0a] dark:text-[#f8f8f8] mb-3">
               Recently Viewed
             </h2>
@@ -201,24 +231,16 @@ const RestaurantsPage = () => {
                   key={restaurant.id}
                   restaurant={restaurant}
                   isFavorite={favoriteRestaurantIds.includes(restaurant.id)}
-                  onToggleFavorite={(restaurantId) => {
-                    const added = toggleFavoriteRestaurant(restaurantId);
-                    addToast({
-                      type: added ? "success" : "info",
-                      title: added
-                        ? "Added to favorites"
-                        : "Removed from favorites",
-                    });
-                  }}
+                  onToggleFavorite={handleFavoriteToggle}
                 />
               ))}
             </div>
-          </section>
+          </Motion.section>
         )}
 
-        <section className="mt-8">
+        <Motion.section {...fadeInUp}>
           <h2 className="font-bold text-[#1a0a0a] dark:text-[#f8f8f8] mb-3">
-            Top Rated
+            Top Rated Picks
           </h2>
           <div className="grid sm:grid-cols-3 gap-4">
             {topRatedRestaurants.map((restaurant) => (
@@ -232,16 +254,17 @@ const RestaurantsPage = () => {
                       {restaurant.category}
                     </p>
                   </div>
-                  <span className="text-primary font-bold">
-                    ⭐ {restaurant.rating}
+                  <span className="inline-flex items-center gap-1 text-primary font-bold">
+                    <Star size={14} className="fill-current" />{" "}
+                    {restaurant.rating}
                   </span>
                 </div>
               </Card>
             ))}
           </div>
-        </section>
+        </Motion.section>
 
-        <section className="mt-10">
+        <Motion.section {...fadeInUp}>
           <h2 className="font-bold text-[#1a0a0a] dark:text-[#f8f8f8] mb-4">
             All Restaurants
           </h2>
@@ -277,15 +300,7 @@ const RestaurantsPage = () => {
                     key={restaurant.id}
                     restaurant={restaurant}
                     isFavorite={favoriteRestaurantIds.includes(restaurant.id)}
-                    onToggleFavorite={(restaurantId) => {
-                      const added = toggleFavoriteRestaurant(restaurantId);
-                      addToast({
-                        type: added ? "success" : "info",
-                        title: added
-                          ? "Added to favorites"
-                          : "Removed from favorites",
-                      });
-                    }}
+                    onToggleFavorite={handleFavoriteToggle}
                   />
                 ))}
               </div>
@@ -302,7 +317,7 @@ const RestaurantsPage = () => {
               <div ref={loadMoreRef} className="h-4" aria-hidden />
             </>
           )}
-        </section>
+        </Motion.section>
       </section>
     </CustomerLayout>
   );

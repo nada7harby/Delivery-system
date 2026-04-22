@@ -1,144 +1,249 @@
-import { useOrderStore, useAuthStore, useCartStore, useAppStore } from "@/store";
+import { useMemo, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { motion as Motion } from "framer-motion";
+import {
+  ArrowUpRight,
+  PackageSearch,
+  Repeat2,
+  ShoppingBag,
+  Sparkles,
+} from "lucide-react";
+import {
+  useOrderStore,
+  useAuthStore,
+  useCartStore,
+  useAppStore,
+} from "@/store";
 import { CustomerLayout } from "@/layouts";
 import { Button, Card, Badge, EmptyState } from "@/components";
-import { Link, useNavigate } from "react-router-dom";
 import { ORDER_STATUS } from "@/constants";
+
+const FILTERS = [
+  { key: "all", label: "All" },
+  { key: "active", label: "Active" },
+  { key: ORDER_STATUS.DELIVERED, label: "Delivered" },
+  { key: ORDER_STATUS.CANCELLED, label: "Cancelled" },
+];
+
+const itemVariants = {
+  initial: { opacity: 0, y: 14 },
+  animate: { opacity: 1, y: 0 },
+};
+
+const isActiveOrder = (status) => {
+  return status !== ORDER_STATUS.DELIVERED && status !== ORDER_STATUS.CANCELLED;
+};
 
 const OrderCard = ({ order }) => {
   const navigate = useNavigate();
   const { addItem } = useCartStore();
   const { addToast } = useAppStore();
 
-  const handleReorder = (e) => {
-    e.stopPropagation();
+  const handleReorder = (event) => {
+    event.stopPropagation();
     order.items.forEach((item) => {
       addItem(item);
     });
     addToast({
       type: "success",
-      title: "Reordered! 🛒",
-      message: "Items from this order added to your cart",
+      title: "Reordered",
+      message: "Items from this order were added to your cart.",
     });
     navigate("/cart");
   };
 
   return (
-    <Card 
-      hover 
-      className="cursor-pointer group" 
-      onClick={() => navigate(`/order/${order.id}`)}
-    >
-      <div className="flex flex-col sm:flex-row gap-4">
-        {/* Status icon/bg area */}
-        <div className="hidden sm:flex w-16 h-16 rounded-2xl bg-gray-50 dark:bg-gray-900/50 items-center justify-center text-3xl group-hover:bg-primary/10 transition-colors">
-          {order.status === ORDER_STATUS.DELIVERED ? "🎉" : "📦"}
-        </div>
-
-        <div className="flex-1 min-w-0">
-          <div className="flex flex-wrap items-center justify-between gap-2 mb-2">
-            <div>
-              <h3 className="font-bold text-[#1a0a0a] dark:text-[#f8f8f8] flex items-center gap-2">
-                Order #{order.id}
-                <Badge status={order.status} size="sm" />
-              </h3>
-              <p className="text-xs text-[#9e7272]">
-                {new Date(order.createdAt).toLocaleDateString()} at {new Date(order.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-              </p>
-            </div>
-            <div className="text-right">
-              <p className="font-black text-primary text-lg">${order.total?.toFixed(2)}</p>
-              <p className="text-[10px] text-[#6b4040] dark:text-[#c9a97a] uppercase font-bold tracking-widest">{order.items?.length} items</p>
-            </div>
+    <Motion.div variants={itemVariants}>
+      <Card
+        hover
+        className="cursor-pointer rounded-3xl border-white/60 bg-white/85 shadow-lg backdrop-blur-sm dark:border-[#284754] dark:bg-[#17303b]/80"
+        onClick={() => navigate(`/order/${order.id}`)}
+      >
+        <div className="flex flex-col sm:flex-row gap-4">
+          <div className="hidden sm:flex w-14 h-14 rounded-2xl bg-gradient-to-br from-[#ff8e42] to-[#f2552c] items-center justify-center text-white">
+            <ShoppingBag size={22} />
           </div>
 
-          <div className="flex items-center gap-2 mb-4 overflow-x-auto pb-1 scrollbar-hide">
-             {order.items.slice(0, 4).map((item, i) => (
-                <div key={i} className="w-10 h-10 rounded-xl overflow-hidden bg-gray-100 dark:bg-gray-800 flex-shrink-0 shadow-sm border border-gray-100 dark:border-gray-800" title={item.name}>
-                  <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
+          <div className="flex-1 min-w-0">
+            <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
+              <div>
+                <div className="flex items-center gap-2 mb-1">
+                  <h3 className="font-display font-bold text-[#0f2a35] dark:text-[#f2fbff]">
+                    Order #{order.id}
+                  </h3>
+                  <Badge status={order.status} />
                 </div>
-             ))}
-             {order.items.length > 4 && (
-                <span className="text-xs text-[#9e7272] font-bold">+{order.items.length - 4} more</span>
-             )}
-          </div>
+                <p className="text-xs text-[#6c8794] dark:text-[#9fb9c6]">
+                  {new Date(order.createdAt).toLocaleDateString()} at{" "}
+                  {new Date(order.createdAt).toLocaleTimeString([], {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })}
+                </p>
+              </div>
+              <div className="text-right">
+                <p className="font-black text-xl text-[#f2552c]">
+                  ${order.total?.toFixed(2)}
+                </p>
+                <p className="text-[11px] uppercase tracking-wider text-[#6c8794] dark:text-[#9fb9c6]">
+                  {order.items?.length} items
+                </p>
+              </div>
+            </div>
 
-          <div className="flex items-center gap-3">
-            <Button 
-                variant="outline" 
-                size="sm" 
+            <div className="flex items-center gap-2 mb-4 overflow-x-auto pb-1 scrollbar-hide">
+              {order.items.slice(0, 5).map((item, index) => (
+                <div
+                  key={`${order.id}-${item.id}-${index}`}
+                  className="w-11 h-11 rounded-xl overflow-hidden bg-slate-100 dark:bg-slate-800 flex-shrink-0 border border-white/40"
+                  title={item.name}
+                >
+                  <img
+                    src={item.image}
+                    alt={item.name}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+              ))}
+              {order.items.length > 5 && (
+                <span className="text-xs font-semibold text-[#6c8794] dark:text-[#9fb9c6]">
+                  +{order.items.length - 5} more
+                </span>
+              )}
+            </div>
+
+            <div className="flex items-center gap-3">
+              <Button
+                variant="outline"
+                size="sm"
                 className="flex-1 sm:flex-initial"
                 onClick={() => navigate(`/order/${order.id}`)}
               >
-                Track Order
+                <span className="inline-flex items-center gap-1">
+                  Track <ArrowUpRight size={14} />
+                </span>
               </Button>
-              <Button 
-                variant="secondary" 
-                size="sm" 
+              <Button
+                variant="secondary"
+                size="sm"
                 className="flex-1 sm:flex-initial"
                 onClick={handleReorder}
               >
-                Reorder 🔁
+                <span className="inline-flex items-center gap-1">
+                  Reorder <Repeat2 size={14} />
+                </span>
               </Button>
+            </div>
           </div>
         </div>
-      </div>
-    </Card>
+      </Card>
+    </Motion.div>
   );
 };
 
 const CustomerOrdersPage = () => {
   const { user } = useAuthStore();
   const { getOrdersByCustomer } = useOrderStore();
-  
-  const orders = getOrdersByCustomer(user?.id).sort((a, b) => 
-    new Date(b.createdAt) - new Date(a.createdAt)
-  );
+  const [filter, setFilter] = useState("all");
+
+  const allOrders = useMemo(() => {
+    return getOrdersByCustomer(user?.id).sort(
+      (a, b) => new Date(b.createdAt) - new Date(a.createdAt),
+    );
+  }, [getOrdersByCustomer, user?.id]);
+
+  const orders = useMemo(() => {
+    if (filter === "all") return allOrders;
+    if (filter === "active") {
+      return allOrders.filter((order) => isActiveOrder(order.status));
+    }
+    return allOrders.filter((order) => order.status === filter);
+  }, [allOrders, filter]);
 
   return (
     <CustomerLayout>
-      <div className="max-w-4xl mx-auto py-4">
-        <div className="flex items-center justify-between mb-8">
-          <div>
-            <h1 className="font-display text-3xl font-black text-[#1a0a0a] dark:text-[#f8f8f8]">My Orders 📦</h1>
-            <p className="text-sm text-[#6b4040] dark:text-[#c9a97a] mt-1">Review and track your recent activity</p>
+      <section className="max-w-5xl mx-auto px-4 py-8">
+        <Motion.div
+          initial={{ opacity: 0, y: 14 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="rounded-[2rem] p-6 bg-gradient-to-r from-[#102a36] via-[#154457] to-[#1e5f78] text-white shadow-2xl"
+        >
+          <p className="text-xs uppercase tracking-[0.24em] text-white/70 inline-flex items-center gap-2">
+            <Sparkles size={13} /> Customer Portal
+          </p>
+          <h1 className="font-display text-3xl font-black mt-2">
+            Order Command Center
+          </h1>
+          <p className="text-sm text-white/80 mt-2">
+            Review every order, track live progress, and reorder in one tap.
+          </p>
+          <div className="mt-5 inline-flex px-3 py-1 rounded-xl bg-white/15 text-sm font-semibold">
+            Total orders: {allOrders.length}
           </div>
-          {orders.length > 0 && (
-            <div className="hidden sm:block px-4 py-2 bg-primary/10 rounded-2xl text-primary font-bold text-sm">
-               Total {orders.length} orders
-            </div>
-          )}
-        </div>
+        </Motion.div>
 
-        {orders.length === 0 ? (
-          <EmptyState
-            icon="🍽️"
-            title="No orders yet"
-            description="Looks like you haven't placed any orders yet. Start exploring our delicious menu!"
-            action={
-              <Link to="/">
-                <Button variant="primary" size="lg" icon="🍔">
-                  Start Ordering
-                </Button>
-              </Link>
-            }
-          />
-        ) : (
-          <div className="grid gap-6">
-            <div className="flex items-center gap-4 mb-2 overflow-x-auto pb-2">
-                <Badge status="info" className="cursor-pointer">All</Badge>
-                <Badge status="pending" className="cursor-pointer opacity-50 hover:opacity-100">Pending</Badge>
-                <Badge status="ontheway" className="cursor-pointer opacity-50 hover:opacity-100">Active</Badge>
-                <Badge status="delivered" className="cursor-pointer opacity-50 hover:opacity-100">Delivered</Badge>
-            </div>
-            
-            <div className="grid gap-5">
+        {allOrders.length > 0 && (
+          <div className="mt-6 flex items-center gap-2 overflow-x-auto pb-2 scrollbar-hide">
+            {FILTERS.map((option) => (
+              <button
+                key={option.key}
+                onClick={() => setFilter(option.key)}
+                className={`px-4 py-2 rounded-xl text-sm font-semibold transition-all ${
+                  filter === option.key
+                    ? "bg-[#f2552c] text-white"
+                    : "bg-white/80 text-[#24404d] hover:bg-white dark:bg-[#18323e] dark:text-[#b7d2de]"
+                }`}
+              >
+                {option.label}
+              </button>
+            ))}
+          </div>
+        )}
+
+        <div className="mt-6">
+          {orders.length === 0 ? (
+            <EmptyState
+              icon="🍽️"
+              title={
+                allOrders.length === 0
+                  ? "No orders yet"
+                  : "No orders in this filter"
+              }
+              description={
+                allOrders.length === 0
+                  ? "Start exploring restaurants and place your first order."
+                  : "Try a different status filter to see your orders."
+              }
+              action={
+                <Link to="/">
+                  <Button variant="primary" size="lg">
+                    Explore Restaurants
+                  </Button>
+                </Link>
+              }
+            />
+          ) : (
+            <Motion.div
+              initial="initial"
+              animate="animate"
+              transition={{ staggerChildren: 0.06 }}
+              className="grid gap-5"
+            >
               {orders.map((order) => (
                 <OrderCard key={order.id} order={order} />
               ))}
-            </div>
+            </Motion.div>
+          )}
+        </div>
+
+        {allOrders.length > 0 && (
+          <div className="mt-8 rounded-2xl border border-dashed border-[#bcd0da] dark:border-[#35525f] p-4 flex items-center gap-3 text-sm text-[#426170] dark:text-[#9fb9c6]">
+            <PackageSearch size={16} />
+            Orders update in real time. Open any card to view live tracking and
+            timeline events.
           </div>
         )}
-      </div>
+      </section>
     </CustomerLayout>
   );
 };

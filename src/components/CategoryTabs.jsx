@@ -1,12 +1,14 @@
 import clsx from "clsx";
+import { motion as Motion } from "framer-motion";
 
 const CategoryTabs = ({ categories = [], activeCategory, onChange }) => {
   return (
     <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
       {categories.map((category) => (
-        <button
+        <Motion.button
           key={category}
           onClick={() => onChange(category)}
+          whileTap={{ scale: 0.98 }}
           className={clsx(
             "flex-shrink-0 px-4 py-2 rounded-xl text-sm font-semibold transition-all",
             activeCategory === category
@@ -15,7 +17,7 @@ const CategoryTabs = ({ categories = [], activeCategory, onChange }) => {
           )}
         >
           {category}
-        </button>
+        </Motion.button>
       ))}
     </div>
   );

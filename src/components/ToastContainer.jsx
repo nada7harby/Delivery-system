@@ -1,18 +1,28 @@
 import useAppStore from "@/store/appStore";
 import clsx from "clsx";
+import { AnimatePresence, motion as Motion } from "framer-motion";
+import {
+  AlertCircle,
+  AlertTriangle,
+  CheckCircle2,
+  Info,
+  X,
+} from "lucide-react";
 
 const ICONS = {
-  success: "✅",
-  error: "❌",
-  info: "ℹ️",
-  warning: "⚠️",
+  success: CheckCircle2,
+  error: AlertCircle,
+  info: Info,
+  warning: AlertTriangle,
 };
 
 const BG = {
-  success: "bg-emerald-50 dark:bg-emerald-900/30 border-emerald-200 dark:border-emerald-700",
+  success:
+    "bg-emerald-50 dark:bg-emerald-900/30 border-emerald-200 dark:border-emerald-700",
   error: "bg-red-50 dark:bg-red-900/30 border-red-200 dark:border-red-700",
   info: "bg-blue-50 dark:bg-blue-900/30 border-blue-200 dark:border-blue-700",
-  warning: "bg-amber-50 dark:bg-amber-900/30 border-amber-200 dark:border-amber-700",
+  warning:
+    "bg-amber-50 dark:bg-amber-900/30 border-amber-200 dark:border-amber-700",
 };
 
 const TEXT = {
@@ -25,15 +35,19 @@ const TEXT = {
 const ToastItem = ({ toast }) => {
   const { removeToast } = useAppStore();
   const type = toast.type || "info";
+  const Icon = ICONS[type] || Info;
 
   return (
-    <div
-      className={clsx(
-        "toast border pointer-events-auto",
-        BG[type]
-      )}
+    <Motion.div
+      initial={{ opacity: 0, x: 24, scale: 0.98 }}
+      animate={{ opacity: 1, x: 0, scale: 1 }}
+      exit={{ opacity: 0, x: 24, scale: 0.98 }}
+      transition={{ duration: 0.2 }}
+      className={clsx("toast border pointer-events-auto", BG[type])}
     >
-      <span className="text-xl flex-shrink-0">{ICONS[type]}</span>
+      <span className="text-xl flex-shrink-0">
+        <Icon size={18} />
+      </span>
       <div className="flex-1 min-w-0">
         {toast.title && (
           <p className={clsx("font-semibold text-sm", TEXT[type])}>
@@ -48,11 +62,14 @@ const ToastItem = ({ toast }) => {
       </div>
       <button
         onClick={() => removeToast(toast.id)}
-        className={clsx("text-sm flex-shrink-0 opacity-60 hover:opacity-100 transition-opacity", TEXT[type])}
+        className={clsx(
+          "text-sm flex-shrink-0 opacity-60 hover:opacity-100 transition-opacity",
+          TEXT[type],
+        )}
       >
-        ✕
+        <X size={14} />
       </button>
-    </div>
+    </Motion.div>
   );
 };
 
@@ -61,9 +78,11 @@ const ToastContainer = () => {
 
   return (
     <div className="toast-container">
-      {toasts.map((toast) => (
-        <ToastItem key={toast.id} toast={toast} />
-      ))}
+      <AnimatePresence>
+        {toasts.map((toast) => (
+          <ToastItem key={toast.id} toast={toast} />
+        ))}
+      </AnimatePresence>
     </div>
   );
 };

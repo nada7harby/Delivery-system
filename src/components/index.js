@@ -10,6 +10,7 @@ export { default as MultiOrderTrackingMap } from "./MultiOrderTrackingMap";
 export { default as HeatmapSimulationMap } from "./HeatmapSimulationMap";
 export { default as EmptyState } from "./EmptyState";
 export { default as LoadingSpinner, PageLoader } from "./LoadingSpinner";
+export { default as Skeleton } from "./Skeleton";
 export { default as CustomSelect } from "./CustomSelect";
 export { default as RestaurantCard } from "./RestaurantCard";
 export { default as MenuItemCard } from "./MenuItemCard";

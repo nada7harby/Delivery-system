@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import QuantitySelector from "@/components/QuantitySelector";
+import { ShoppingBag, Trash2 } from "lucide-react";
 
 const CartSidebar = ({
   items = [],
@@ -11,8 +12,9 @@ const CartSidebar = ({
   onClear,
 }) => {
   return (
-    <aside className="rounded-2xl border border-[#E5D0AC] dark:border-[#3d1a1a] bg-white/90 dark:bg-[#1a0a0a] backdrop-blur-sm p-4 sticky top-24">
-      <h3 className="font-bold text-[#1a0a0a] dark:text-[#f8f8f8]">
+    <aside className="rounded-3xl border border-[#E5D0AC] dark:border-[#3d1a1a] bg-white/90 dark:bg-[#1a0a0a] backdrop-blur-sm p-4 sticky top-24 shadow-sm">
+      <h3 className="font-bold text-[#1a0a0a] dark:text-[#f8f8f8] flex items-center gap-2">
+        <ShoppingBag size={16} />
         Your Cart
       </h3>
       <p className="text-xs mt-1 text-[#6b4040] dark:text-[#c9a97a]">
@@ -63,8 +65,9 @@ const CartSidebar = ({
             <div className="mt-3 grid grid-cols-2 gap-2">
               <button
                 onClick={onClear}
-                className="px-3 py-2 rounded-lg border border-[#E5D0AC] dark:border-[#3d1a1a] text-xs font-semibold text-[#6b4040] dark:text-[#c9a97a]"
+                className="inline-flex justify-center items-center gap-1 px-3 py-2 rounded-lg border border-[#E5D0AC] dark:border-[#3d1a1a] text-xs font-semibold text-[#6b4040] dark:text-[#c9a97a]"
               >
+                <Trash2 size={13} />
                 Clear
               </button>
               <Link

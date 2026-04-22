@@ -1,4 +1,6 @@
 import QuantitySelector from "@/components/QuantitySelector";
+import { motion as Motion } from "framer-motion";
+import { Plus } from "lucide-react";
 
 const MenuItemCard = ({
   item,
@@ -8,7 +10,11 @@ const MenuItemCard = ({
   onIncrement,
 }) => {
   return (
-    <div className="p-4 rounded-2xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-[#1a0a0a] flex items-center gap-4">
+    <Motion.div
+      whileHover={{ y: -3 }}
+      transition={{ duration: 0.2 }}
+      className="p-4 rounded-2xl border border-[#E5D0AC]/70 dark:border-[#3d1a1a] bg-white dark:bg-[#1a0a0a] flex items-center gap-4"
+    >
       <div className="w-20 h-20 rounded-xl overflow-hidden flex-shrink-0 bg-gray-100 dark:bg-gray-900">
         <img
           src={item.image}
@@ -41,14 +47,15 @@ const MenuItemCard = ({
           ) : (
             <button
               onClick={onAdd}
-              className="px-3 py-1.5 rounded-lg text-sm font-semibold bg-primary text-white hover:bg-primary-light transition-colors"
+              className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-sm font-semibold bg-primary text-white hover:bg-primary-light transition-colors"
             >
+              <Plus size={14} />
               Add to cart
             </button>
           )}
         </div>
       </div>
-    </div>
+    </Motion.div>
   );
 };
 

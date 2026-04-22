@@ -1,4 +1,6 @@
 import { Link } from "react-router-dom";
+import { motion as Motion } from "framer-motion";
+import { ShoppingCart, Trash2 } from "lucide-react";
 import { useCartStore, useAppStore, useMarketplaceStore } from "@/store";
 import { CustomerLayout } from "@/layouts";
 import { Button, Card, EmptyState } from "@/components";
@@ -51,9 +53,13 @@ const CartPage = () => {
     <CustomerLayout>
       <div className="max-w-7xl mx-auto px-4 py-8">
         <div className="max-w-4xl mx-auto">
-          <h1 className="font-display text-3xl font-bold text-[#1a0a0a] dark:text-[#f8f8f8] mb-6">
-            Your Cart 🛒
-          </h1>
+          <Motion.h1
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="font-display text-3xl font-bold text-[#1a0a0a] dark:text-[#f8f8f8] mb-6 inline-flex items-center gap-2"
+          >
+            <ShoppingCart size={26} /> Your Cart
+          </Motion.h1>
 
           {restaurant && (
             <div className="mb-4 text-sm text-[#6b4040] dark:text-[#c9a97a]">
@@ -68,55 +74,66 @@ const CartPage = () => {
             {/* ... items ... */}
             <div className="lg:col-span-2 space-y-3">
               {items.map((item) => (
-                <Card key={item.id} className="flex items-center gap-4">
-                  <div className="w-16 h-16 bg-gray-100 dark:bg-gray-900 rounded-xl flex items-center justify-center overflow-hidden flex-shrink-0 border border-gray-100 dark:border-gray-800">
-                    <img
-                      src={item.image}
-                      alt={item.name}
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
+                <Motion.div
+                  key={item.id}
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                >
+                  <Card className="flex items-center gap-4 rounded-2xl">
+                    <div className="w-16 h-16 bg-gray-100 dark:bg-gray-900 rounded-xl flex items-center justify-center overflow-hidden flex-shrink-0 border border-gray-100 dark:border-gray-800">
+                      <img
+                        src={item.image}
+                        alt={item.name}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
 
-                  <div className="flex-1 min-w-0">
-                    <h3 className="font-semibold text-[#1a0a0a] dark:text-[#f8f8f8] truncate">
-                      {item.name}
-                    </h3>
-                    <p className="text-primary font-bold">
-                      ${item.price.toFixed(2)} each
-                    </p>
-                  </div>
+                    <div className="flex-1 min-w-0">
+                      <h3 className="font-semibold text-[#1a0a0a] dark:text-[#f8f8f8] truncate">
+                        {item.name}
+                      </h3>
+                      <p className="text-primary font-bold">
+                        ${item.price.toFixed(2)} each
+                      </p>
+                    </div>
 
-                  {/* Quantity */}
-                  <div className="flex items-center gap-2">
-                    <button
-                      onClick={() => updateQuantity(item.id, item.quantity - 1)}
-                      className="w-8 h-8 rounded-lg bg-[#E5D0AC]/50 dark:bg-[#3d1a1a]/50 flex items-center justify-center font-bold text-primary hover:bg-primary hover:text-white transition-colors"
-                    >
-                      −
-                    </button>
-                    <span className="w-6 text-center font-bold text-[#1a0a0a] dark:text-[#f8f8f8]">
-                      {item.quantity}
-                    </span>
-                    <button
-                      onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                      className="w-8 h-8 rounded-lg bg-[#E5D0AC]/50 dark:bg-[#3d1a1a]/50 flex items-center justify-center font-bold text-primary hover:bg-primary hover:text-white transition-colors"
-                    >
-                      +
-                    </button>
-                  </div>
+                    {/* Quantity */}
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() =>
+                          updateQuantity(item.id, item.quantity - 1)
+                        }
+                        className="w-8 h-8 rounded-lg bg-[#E5D0AC]/50 dark:bg-[#3d1a1a]/50 flex items-center justify-center font-bold text-primary hover:bg-primary hover:text-white transition-colors"
+                      >
+                        −
+                      </button>
+                      <span className="w-6 text-center font-bold text-[#1a0a0a] dark:text-[#f8f8f8]">
+                        {item.quantity}
+                      </span>
+                      <button
+                        onClick={() =>
+                          updateQuantity(item.id, item.quantity + 1)
+                        }
+                        className="w-8 h-8 rounded-lg bg-[#E5D0AC]/50 dark:bg-[#3d1a1a]/50 flex items-center justify-center font-bold text-primary hover:bg-primary hover:text-white transition-colors"
+                      >
+                        +
+                      </button>
+                    </div>
 
-                  <div className="text-right">
-                    <p className="font-bold text-[#1a0a0a] dark:text-[#f8f8f8]">
-                      ${(item.price * item.quantity).toFixed(2)}
-                    </p>
-                    <button
-                      onClick={() => handleRemove(item)}
-                      className="text-xs text-red-500 hover:text-red-700 mt-0.5 transition-colors"
-                    >
-                      Remove
-                    </button>
-                  </div>
-                </Card>
+                    <div className="text-right">
+                      <p className="font-bold text-[#1a0a0a] dark:text-[#f8f8f8]">
+                        ${(item.price * item.quantity).toFixed(2)}
+                      </p>
+                      <button
+                        onClick={() => handleRemove(item)}
+                        className="inline-flex items-center gap-1 text-xs text-red-500 hover:text-red-700 mt-0.5 transition-colors"
+                      >
+                        <Trash2 size={12} />
+                        Remove
+                      </button>
+                    </div>
+                  </Card>
+                </Motion.div>
               ))}
 
               <div className="flex justify-end">

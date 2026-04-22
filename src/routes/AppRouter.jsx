@@ -35,6 +35,9 @@ import AdminDriversPage from "@/pages/admin/AdminDriversPage";
 import AdminCustomersPage from "@/pages/admin/AdminCustomersPage";
 import AdminLiveTrackingPage from "@/pages/admin/AdminLiveTrackingPage";
 import AdminHeatmapPage from "@/pages/admin/AdminHeatmapPage";
+import AdminRestaurantsPage from "@/pages/admin/AdminRestaurantsPage";
+import AdminRestaurantFormPage from "@/pages/admin/AdminRestaurantFormPage";
+import AdminRestaurantMenuPage from "@/pages/admin/AdminRestaurantMenuPage";
 
 // 404
 const NotFoundPage = () => (
@@ -286,6 +289,38 @@ const AppRouter = () => {
           element={
             <ProtectedRoute allowedRoles={["admin"]}>
               <AdminCustomersPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/restaurants"
+          element={
+            <ProtectedRoute allowedRoles={["admin"]}>
+              <AdminRestaurantsPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/restaurants/create"
+          element={
+            <ProtectedRoute allowedRoles={["admin"]}>
+              <AdminRestaurantFormPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/restaurants/:id/edit"
+          element={
+            <ProtectedRoute allowedRoles={["admin"]}>
+              <AdminRestaurantFormPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/restaurants/:id/menu"
+          element={
+            <ProtectedRoute allowedRoles={["admin"]}>
+              <AdminRestaurantMenuPage />
             </ProtectedRoute>
           }
         />

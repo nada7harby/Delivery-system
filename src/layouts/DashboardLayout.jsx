@@ -21,6 +21,7 @@ const DashboardLayout = ({ children, role = "driver" }) => {
 
   const adminNav = [
     { to: "/admin", label: "Dashboard", icon: "📊", exact: true },
+    { to: "/admin/restaurants", label: "Restaurants", icon: "🏪" },
     { to: "/admin/live-tracking", label: "Live Tracking", icon: "🛰️" },
     { to: "/admin/heatmap", label: "Heatmap", icon: "🔥" },
     { to: "/admin/orders", label: "All Orders", icon: "📋" },

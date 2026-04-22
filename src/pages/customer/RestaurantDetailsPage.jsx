@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, Navigate, useParams } from "react-router-dom";
+import { motion as Motion } from "framer-motion";
+import { Clock3, Heart, MapPin, Star, TriangleAlert } from "lucide-react";
 import { useMarketplaceStore, useCartStore, useAppStore } from "@/store";
 import { CustomerLayout } from "@/layouts";
 import {
@@ -42,7 +44,7 @@ const RestaurantDetailsPage = () => {
     if (restaurant?.id) {
       setSelectedRestaurant(restaurant.id);
     }
-  }, [restaurant?.id]);
+  }, [restaurant?.id, setSelectedRestaurant]);
 
   if (!restaurant) {
     return <Navigate to="/" replace />;
@@ -106,7 +108,12 @@ const RestaurantDetailsPage = () => {
   return (
     <CustomerLayout>
       <section className="max-w-7xl mx-auto px-4 py-8">
-        <div className="relative rounded-3xl overflow-hidden mb-6">
+        <Motion.div
+          initial={{ opacity: 0, y: 18 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.35 }}
+          className="relative rounded-3xl overflow-hidden mb-6"
+        >
           <img
             src={restaurant.image}
             alt={restaurant.name}
@@ -125,20 +132,35 @@ const RestaurantDetailsPage = () => {
                 <p className="text-white/90 text-sm mt-2 max-w-2xl">
                   {restaurant.description}
                 </p>
-                <p className="text-white/90 text-xs mt-2">
-                  ⭐ {restaurant.rating} • {restaurant.deliveryTime} min •{" "}
-                  {restaurant.location}
+                <p className="text-white/90 text-xs mt-2 inline-flex flex-wrap items-center gap-3">
+                  <span className="inline-flex items-center gap-1">
+                    <Star size={12} className="fill-current" />{" "}
+                    {restaurant.rating}
+                  </span>
+                  <span className="inline-flex items-center gap-1">
+                    <Clock3 size={12} /> {restaurant.deliveryTime} min
+                  </span>
+                  <span className="inline-flex items-center gap-1">
+                    <MapPin size={12} /> {restaurant.location}
+                  </span>
                 </p>
               </div>
               <button
                 onClick={() => toggleFavoriteRestaurant(restaurant.id)}
                 className="w-10 h-10 rounded-full bg-white/90 flex items-center justify-center"
               >
-                {favoriteRestaurantIds.includes(restaurant.id) ? "❤️" : "🤍"}
+                <Heart
+                  size={16}
+                  className={
+                    favoriteRestaurantIds.includes(restaurant.id)
+                      ? "fill-red-500 text-red-500"
+                      : "text-slate-700"
+                  }
+                />
               </button>
             </div>
           </div>
-        </div>
+        </Motion.div>
 
         <div className="mb-4 flex flex-wrap items-center gap-2">
           {!restaurant.isOpen && <Badge status="cancelled" />}
@@ -152,6 +174,7 @@ const RestaurantDetailsPage = () => {
             restaurantId !== restaurant.id &&
             getItemCount() > 0 && (
               <div className="text-xs px-3 py-1.5 rounded-full bg-amber-100 text-amber-700 dark:bg-amber-900/20 dark:text-amber-300">
+                <TriangleAlert size={12} className="inline mr-1" />
                 Your cart currently has items from another restaurant.
               </div>
             )}
@@ -164,7 +187,11 @@ const RestaurantDetailsPage = () => {
         />
 
         <div className="mt-6 grid lg:grid-cols-[1fr_320px] gap-6 items-start">
-          <div>
+          <Motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.1 }}
+          >
             {menuItems.length === 0 ? (
               <EmptyState
                 icon="📭"
@@ -199,7 +226,7 @@ const RestaurantDetailsPage = () => {
                 ))}
               </div>
             )}
-          </div>
+          </Motion.div>
 
           <div className="hidden lg:block">
             <CartSidebar

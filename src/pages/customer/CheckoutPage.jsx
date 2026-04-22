@@ -1,5 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { motion as Motion } from "framer-motion";
+import { CreditCard, LocateFixed, Timer } from "lucide-react";
 import {
   useCartStore,
   useOrderStore,
@@ -113,9 +115,13 @@ const CheckoutPage = () => {
     <CustomerLayout>
       <div className="max-w-7xl mx-auto px-4 py-8">
         <div className="max-w-4xl mx-auto">
-          <h1 className="font-display text-3xl font-bold text-[#1a0a0a] dark:text-[#f8f8f8] mb-6">
-            Checkout 🛍️
-          </h1>
+          <Motion.h1
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="font-display text-3xl font-bold text-[#1a0a0a] dark:text-[#f8f8f8] mb-6"
+          >
+            Checkout
+          </Motion.h1>
           {restaurant && (
             <p className="mb-5 text-sm text-[#6b4040] dark:text-[#c9a97a]">
               You are checking out items from{" "}
@@ -129,96 +135,109 @@ const CheckoutPage = () => {
             {/* Form */}
             <div className="lg:col-span-2 space-y-5">
               {/* Delivery details */}
-              <Card>
-                <h2 className="font-bold text-[#1a0a0a] dark:text-[#f8f8f8] mb-4 flex items-center gap-2">
-                  <span>📍</span> Delivery Details
-                </h2>
-                <div className="space-y-4">
-                  <Input
-                    label="Delivery Address"
-                    placeholder="123 Main St, City, State"
-                    value={form.address}
-                    onChange={(e) =>
-                      setForm({ ...form, address: e.target.value })
-                    }
-                    icon="🏠"
-                    required
-                  />
-                  <Input
-                    label="Phone Number"
-                    type="tel"
-                    placeholder="+1 (555) 000-0000"
-                    value={form.phone}
-                    onChange={(e) =>
-                      setForm({ ...form, phone: e.target.value })
-                    }
-                    icon="📱"
-                  />
-                  <div>
-                    <label className="input-label">Special Instructions</label>
-                    <textarea
-                      value={form.notes}
-                      onChange={(e) =>
-                        setForm({ ...form, notes: e.target.value })
-                      }
-                      placeholder="E.g., no onions, extra sauce, leave at door..."
-                      rows={3}
-                      className="input resize-none"
-                    />
-                  </div>
-                </div>
-              </Card>
-
-              {/* Payment method */}
-              <Card>
-                <h2 className="font-bold text-[#1a0a0a] dark:text-[#f8f8f8] mb-4 flex items-center gap-2">
-                  <span>💳</span> Payment Method
-                </h2>
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                  {[
-                    { value: "card", icon: "💳", label: "Credit Card" },
-                    { value: "cash", icon: "💵", label: "Cash" },
-                    { value: "wallet", icon: "📱", label: "Digital Wallet" },
-                  ].map((method) => (
-                    <button
-                      key={method.value}
-                      onClick={() =>
-                        setForm({ ...form, paymentMethod: method.value })
-                      }
-                      className={`flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all ${
-                        form.paymentMethod === method.value
-                          ? "border-primary bg-primary/10"
-                          : "border-[#E5D0AC] dark:border-[#3d1a1a] hover:border-primary/50"
-                      }`}
-                    >
-                      <span className="text-2xl">{method.icon}</span>
-                      <span className="text-xs font-semibold text-[#1a0a0a] dark:text-[#f8f8f8]">
-                        {method.label}
-                      </span>
-                    </button>
-                  ))}
-                </div>
-
-                {form.paymentMethod === "card" && (
-                  <div className="mt-4 space-y-3">
+              <Motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+              >
+                <Card>
+                  <h2 className="font-bold text-[#1a0a0a] dark:text-[#f8f8f8] mb-4 flex items-center gap-2">
+                    <LocateFixed size={17} /> Delivery Details
+                  </h2>
+                  <div className="space-y-4">
                     <Input
-                      label="Card Number"
-                      placeholder="•••• •••• •••• 4242"
-                      icon="💳"
-                      hint="Demo: any number works"
+                      label="Delivery Address"
+                      placeholder="123 Main St, City, State"
+                      value={form.address}
+                      onChange={(e) =>
+                        setForm({ ...form, address: e.target.value })
+                      }
+                      icon="🏠"
+                      required
                     />
-                    <div className="grid grid-cols-2 gap-3">
-                      <Input label="Expiry" placeholder="MM/YY" />
-                      <Input label="CVC" placeholder="•••" />
+                    <Input
+                      label="Phone Number"
+                      type="tel"
+                      placeholder="+1 (555) 000-0000"
+                      value={form.phone}
+                      onChange={(e) =>
+                        setForm({ ...form, phone: e.target.value })
+                      }
+                      icon="📱"
+                    />
+                    <div>
+                      <label className="input-label">
+                        Special Instructions
+                      </label>
+                      <textarea
+                        value={form.notes}
+                        onChange={(e) =>
+                          setForm({ ...form, notes: e.target.value })
+                        }
+                        placeholder="E.g., no onions, extra sauce, leave at door..."
+                        rows={3}
+                        className="input resize-none"
+                      />
                     </div>
                   </div>
-                )}
-              </Card>
+                </Card>
+              </Motion.div>
+
+              {/* Payment method */}
+              <Motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.05 }}
+              >
+                <Card>
+                  <h2 className="font-bold text-[#1a0a0a] dark:text-[#f8f8f8] mb-4 flex items-center gap-2">
+                    <CreditCard size={17} /> Payment Method
+                  </h2>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                    {[
+                      { value: "card", icon: "💳", label: "Credit Card" },
+                      { value: "cash", icon: "💵", label: "Cash" },
+                      { value: "wallet", icon: "📱", label: "Digital Wallet" },
+                    ].map((method) => (
+                      <button
+                        key={method.value}
+                        onClick={() =>
+                          setForm({ ...form, paymentMethod: method.value })
+                        }
+                        className={`flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all ${
+                          form.paymentMethod === method.value
+                            ? "border-primary bg-primary/10"
+                            : "border-[#E5D0AC] dark:border-[#3d1a1a] hover:border-primary/50"
+                        }`}
+                      >
+                        <span className="text-2xl">{method.icon}</span>
+                        <span className="text-xs font-semibold text-[#1a0a0a] dark:text-[#f8f8f8]">
+                          {method.label}
+                        </span>
+                      </button>
+                    ))}
+                  </div>
+
+                  {form.paymentMethod === "card" && (
+                    <div className="mt-4 space-y-3">
+                      <Input
+                        label="Card Number"
+                        placeholder="•••• •••• •••• 4242"
+                        icon="💳"
+                        hint="Demo: any number works"
+                      />
+                      <div className="grid grid-cols-2 gap-3">
+                        <Input label="Expiry" placeholder="MM/YY" />
+                        <Input label="CVC" placeholder="•••" />
+                      </div>
+                    </div>
+                  )}
+                </Card>
+              </Motion.div>
             </div>
 
             {/* Order summary */}
             <div>
-              <Card className="sticky top-24">
+              <Card className="sticky top-24 rounded-2xl">
                 <h2 className="font-bold text-[#1a0a0a] dark:text-[#f8f8f8] mb-4">
                   Order Summary
                 </h2>
@@ -283,7 +302,7 @@ const CheckoutPage = () => {
                 </div>
 
                 <div className="mt-4 p-3 bg-[#E5D0AC]/30 dark:bg-[#3d1a1a]/30 rounded-xl text-xs text-[#6b4040] dark:text-[#c9a97a] flex items-center gap-2">
-                  <span>⏱</span>
+                  <Timer size={14} />
                   <span>Estimated delivery: 25–45 minutes</span>
                 </div>
 
