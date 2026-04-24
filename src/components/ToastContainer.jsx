@@ -36,7 +36,7 @@ const TEXT = {
 const ToastItem = ({ toast }) => {
   const { removeToast } = useAppStore();
   const type = toast.type || "info";
-  const Icon = ICONS[type] || Info;
+  const Icon = toast.icon || ICONS[type] || faInfoCircle;
 
   return (
     <Motion.div
