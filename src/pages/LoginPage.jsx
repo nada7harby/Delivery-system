@@ -3,6 +3,15 @@ import { Link, useNavigate } from "react-router-dom";
 import { useAuthStore, useAppStore } from "@/store";
 import Button from "@/components/Button";
 import Input from "@/components/Input";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+  faEnvelope,
+  faLock,
+  faUser,
+  faMotorcycle,
+  faUserTie,
+  faExclamationTriangle,
+} from "@/utils/icons";
 import clsx from "clsx";
 
 const LoginPage = () => {
@@ -121,7 +130,7 @@ const LoginPage = () => {
                   placeholder="name@company.com"
                   value={form.email}
                   onChange={(e) => setForm({ ...form, email: e.target.value })}
-                  icon="📧"
+                  icon={<FontAwesomeIcon icon={faEnvelope} />}
                   required
                 />
                 <div className="relative group">
@@ -131,7 +140,7 @@ const LoginPage = () => {
                     placeholder="••••••••"
                     value={form.password}
                     onChange={(e) => setForm({ ...form, password: e.target.value })}
-                    icon="🔒"
+                    icon={<FontAwesomeIcon icon={faLock} />}
                     required
                   />
                   <Link to="#" className="absolute top-0 right-0 text-[11px] font-black text-primary uppercase hover:underline">
@@ -142,7 +151,7 @@ const LoginPage = () => {
 
               {error && (
                 <div className="px-4 py-3 rounded-2xl bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 text-xs font-bold border border-red-100 dark:border-red-900/50 animate-shake">
-                   ⚠️ {error}
+                   <FontAwesomeIcon icon={faExclamationTriangle} className="mr-2" /> {error}
                 </div>
               )}
 
@@ -170,9 +179,9 @@ const LoginPage = () => {
             {/* Quick Demo Login Grid */}
             <div className="grid grid-cols-3 gap-3">
               {[
-                { role: "Customer", email: "customer@demo.com", icon: "👤", color: "hover:border-blue-500" },
-                { role: "Driver", email: "driver@demo.com", icon: "🛵", color: "hover:border-emerald-500" },
-                { role: "Admin", email: "admin@demo.com", icon: "👔", color: "hover:border-amber-500" },
+                { role: "Customer", email: "customer@demo.com", icon: faUser, color: "hover:border-blue-500" },
+                { role: "Driver", email: "driver@demo.com", icon: faMotorcycle, color: "hover:border-emerald-500" },
+                { role: "Admin", email: "admin@demo.com", icon: faUserTie, color: "hover:border-amber-500" },
               ].map((demo) => (
                 <button
                   key={demo.role}
@@ -184,7 +193,7 @@ const LoginPage = () => {
                     demo.color
                   )}
                 >
-                  <span className="text-xl group-hover:scale-110 transition-transform">{demo.icon}</span>
+                  <span className="text-xl group-hover:scale-110 transition-transform"><FontAwesomeIcon icon={demo.icon} /></span>
                   <span className="text-[10px] font-black text-[#1a0a0a] dark:text-[#f8f8f8] uppercase">
                     {demo.role}
                   </span>

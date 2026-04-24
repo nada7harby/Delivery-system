@@ -1,3 +1,6 @@
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faPlus, faMinus } from "@/utils/icons";
+
 const QuantitySelector = ({
   value,
   onDecrement,
@@ -17,7 +20,7 @@ const QuantitySelector = ({
           compact ? "w-7 h-7" : "w-8 h-8"
         } rounded-lg font-bold text-primary hover:bg-primary hover:text-white transition-colors`}
       >
-        -
+        <FontAwesomeIcon icon={faMinus} className="text-xs" />
       </button>
       <span
         className={`${
@@ -33,7 +36,7 @@ const QuantitySelector = ({
           compact ? "w-7 h-7" : "w-8 h-8"
         } rounded-lg font-bold text-primary hover:bg-primary hover:text-white transition-colors`}
       >
-        +
+        <FontAwesomeIcon icon={faPlus} className="text-xs" />
       </button>
     </div>
   );

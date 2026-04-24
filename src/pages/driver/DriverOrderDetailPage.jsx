@@ -17,42 +17,58 @@ import {
   Modal,
 } from "@/components";
 import { ORDER_STATUS, STATUS_LABELS } from "@/constants";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+  faCheck,
+  faUtensils,
+  faBox,
+  faMotorcycle,
+  faMapMarkerAlt,
+  faTrophy,
+  faChevronLeft,
+  faExternalLinkAlt,
+  faUser,
+  faPhone,
+  faComment,
+  faCamera,
+  faQuestionCircle,
+} from "@/utils/icons";
 import clsx from "clsx";
 
 const NEXT_STATUS_ACTIONS = {
   [ORDER_STATUS.PENDING]: {
     label: "Accept Order",
-    icon: "✅",
+    icon: faCheck,
     status: ORDER_STATUS.CONFIRMED,
     variant: "success",
   },
   [ORDER_STATUS.CONFIRMED]: {
     label: "Start Preparing",
-    icon: "👨‍🍳",
+    icon: faUtensils,
     status: ORDER_STATUS.PREPARING,
     variant: "primary",
   },
   [ORDER_STATUS.PREPARING]: {
     label: "Ready for Pickup",
-    icon: "📦",
+    icon: faBox,
     status: ORDER_STATUS.READY,
     variant: "primary",
   },
   [ORDER_STATUS.READY]: {
     label: "Picked Up",
-    icon: "🛵",
+    icon: faMotorcycle,
     status: ORDER_STATUS.PICKED_UP,
     variant: "primary",
   },
   [ORDER_STATUS.PICKED_UP]: {
     label: "Start Delivery (On Way)",
-    icon: "🚴",
+    icon: faMapMarkerAlt,
     status: ORDER_STATUS.ON_THE_WAY,
     variant: "primary",
   },
   [ORDER_STATUS.ON_THE_WAY]: {
     label: "Complete Delivery",
-    icon: "🎉",
+    icon: faTrophy,
     status: ORDER_STATUS.DELIVERED,
     variant: "success",
   },
@@ -99,7 +115,7 @@ const DriverOrderDetailPage = () => {
     return (
       <DashboardLayout role="driver">
         <div className="text-center py-16">
-          <div className="text-5xl mb-3">❓</div>
+          <div className="text-5xl mb-3 text-primary/20"><FontAwesomeIcon icon={faQuestionCircle} /></div>
           <p className="font-bold text-[#1a0a0a] dark:text-[#f8f8f8]">
             Order not found
           </p>
@@ -207,7 +223,7 @@ const DriverOrderDetailPage = () => {
   };
 
   const simulatePhoto = () => {
-    setProofImage("📸 Delivery Photo Captured");
+    setProofImage("Delivery Photo Captured");
     addToast({
       type: "info",
       title: "Photo Captured",
@@ -225,7 +241,7 @@ const DriverOrderDetailPage = () => {
               onClick={() => navigate(-1)}
               className="w-10 h-10 rounded-2xl bg-white dark:bg-gray-900 flex items-center justify-center shadow-sm hover:text-primary transition-colors"
             >
-              ←
+              <FontAwesomeIcon icon={faChevronLeft} />
             </button>
             <div>
               <h1 className="text-xl font-black text-[#1a0a0a] dark:text-[#f8f8f8]">
@@ -254,7 +270,7 @@ const DriverOrderDetailPage = () => {
             >
               <div className="px-5 py-4 bg-white dark:bg-gray-900 border-b border-gray-50 dark:border-gray-800 flex justify-between items-center">
                 <h2 className="font-black text-[#1a0a0a] dark:text-[#f8f8f8] flex items-center gap-2">
-                  <span className="text-primary">📍</span> Live Navigation
+                  <span className="text-primary"><FontAwesomeIcon icon={faMapMarkerAlt} /></span> Live Navigation
                 </h2>
                 {isTracking && (
                   <span className="px-2 py-1 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 text-[10px] font-black rounded-full animate-pulse border border-emerald-200">
@@ -292,7 +308,7 @@ const DriverOrderDetailPage = () => {
                       `https://maps.google.com/?q=${order.customerAddress}`,
                     )
                   }
-                  icon="↗️"
+                  icon={<FontAwesomeIcon icon={faExternalLinkAlt} />}
                 >
                   Open Outer Map
                 </Button>
@@ -347,7 +363,7 @@ const DriverOrderDetailPage = () => {
               </h2>
               <div className="flex items-center gap-4 mb-6">
                 <div className="w-14 h-14 bg-white dark:bg-gray-900 rounded-full flex items-center justify-center text-xl shadow-sm border-2 border-primary/20">
-                  👤
+                  <FontAwesomeIcon icon={faUser} className="text-primary/40" />
                 </div>
                 <div>
                   <p className="font-black text-[#1a0a0a] dark:text-[#f8f8f8]">
@@ -362,12 +378,12 @@ const DriverOrderDetailPage = () => {
                 <Button
                   variant="primary"
                   className="flex-1"
-                  icon="📱"
+                  icon={<FontAwesomeIcon icon={faPhone} />}
                   onClick={() => window.open(`tel:${order.customerPhone}`)}
                 >
                   Call
                 </Button>
-                <Button variant="secondary" className="flex-1" icon="💬">
+                <Button variant="secondary" className="flex-1" icon={<FontAwesomeIcon icon={faComment} />}>
                   Chat
                 </Button>
               </div>
@@ -403,7 +419,7 @@ const DriverOrderDetailPage = () => {
                     onClick={handleAccept}
                     loading={isUpdating}
                   >
-                    ACCEPT ORDER ✅
+                    ACCEPT ORDER <FontAwesomeIcon icon={faCheck} className="ml-2" />
                   </Button>
                   <Button
                     variant="ghost"
@@ -423,7 +439,7 @@ const DriverOrderDetailPage = () => {
                     className="w-full py-6 text-lg shadow-glow"
                     onClick={handleStatusUpdate}
                     loading={isUpdating}
-                    icon={nextAction.icon}
+                    icon={<FontAwesomeIcon icon={nextAction.icon} />}
                   >
                     {nextAction.label}
                   </Button>
@@ -438,7 +454,7 @@ const DriverOrderDetailPage = () => {
 
               {order.status === ORDER_STATUS.DELIVERED && (
                 <div className="p-6 bg-emerald-50 dark:bg-emerald-900/20 rounded-2xl text-center">
-                  <div className="text-4xl mb-2">🏆</div>
+                  <div className="text-4xl mb-2 text-amber-500"><FontAwesomeIcon icon={faTrophy} /></div>
                   <p className="font-black text-emerald-600">
                     MISSION COMPLETED
                   </p>
@@ -464,7 +480,7 @@ const DriverOrderDetailPage = () => {
       <Modal
         isOpen={showProof}
         onClose={() => setShowProof(false)}
-        title="Proof of Delivery 📸"
+        title={<>Proof of Delivery <FontAwesomeIcon icon={faCamera} className="ml-2 text-primary" /></>}
         footer={
           <Button
             variant="primary"
@@ -488,7 +504,7 @@ const DriverOrderDetailPage = () => {
           >
             {proofImage ? (
               <div className="flex flex-col items-center gap-2">
-                <span className="text-4xl">📸</span>
+                <span className="text-4xl text-emerald-500"><FontAwesomeIcon icon={faCamera} /></span>
                 <span className="font-bold text-emerald-600">
                   Photo Attached!
                 </span>
@@ -504,7 +520,7 @@ const DriverOrderDetailPage = () => {
               </div>
             ) : (
               <div className="flex flex-col items-center gap-2">
-                <span className="text-4xl">📷</span>
+                <span className="text-4xl text-primary/20"><FontAwesomeIcon icon={faCamera} /></span>
                 <span className="font-bold text-gray-500">
                   Take a photo of the package
                 </span>

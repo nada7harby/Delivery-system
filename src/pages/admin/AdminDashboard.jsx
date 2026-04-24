@@ -3,6 +3,13 @@ import { Link } from "react-router-dom";
 import { useOrderStore, useAuthStore, useDriverStore } from "@/store";
 import { DashboardLayout } from "@/layouts";
 import { Card, Badge } from "@/components";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+  faClipboardList, faSyncAlt, faCheckCircle, faDollarSign,
+  faMotorcycle, faCircle, faTimesCircle, faClock,
+  faExclamationTriangle, faAward, faSatellite, faFire,
+  faUsers, faChartLine, faArrowLeft
+} from "@/utils/icons";
 import { ORDER_STATUS, STATUS_LABELS, STATUS_COLORS } from "@/constants";
 
 // ─── Mini helpers ──────────────────────────────────────────────────────────────
@@ -64,7 +71,7 @@ const KpiCard = ({ label, value, icon, sub, gradient, animDelay = 0 }) => {
           <p className="text-3xl font-black">{display}</p>
           {sub && <p className="text-white/60 text-xs mt-1">{sub}</p>}
         </div>
-        <span className="text-3xl opacity-80">{icon}</span>
+        <span className="text-2xl opacity-80"><FontAwesomeIcon icon={icon} /></span>
       </div>
       {/* Decorative pulse */}
       <div className="absolute -bottom-4 -right-4 w-20 h-20 rounded-full bg-white/10" />
@@ -324,25 +331,25 @@ const timeAgo = (iso) => {
 
 const EVENT_ICONS = {
   created: {
-    icon: "📋",
+    icon: faClipboardList,
     color: "bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400",
   },
   assigned: {
-    icon: "🚴",
+    icon: faMotorcycle,
     color:
       "bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400",
   },
   delivered: {
-    icon: "🎉",
+    icon: faAward,
     color:
       "bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400",
   },
   cancelled: {
-    icon: "❌",
+    icon: faTimesCircle,
     color: "bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400",
   },
   status: {
-    icon: "🔄",
+    icon: faSyncAlt,
     color:
       "bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400",
   },
@@ -436,7 +443,7 @@ const AdminDashboard = () => {
       <div className="mb-6 flex items-center justify-between flex-wrap gap-3">
         <div>
           <h1 className="font-display text-2xl font-bold text-[#1a0a0a] dark:text-[#f8f8f8]">
-            Admin Dashboard 📊
+            Admin Dashboard <FontAwesomeIcon icon={faChartLine} className="text-primary" />
           </h1>
           <p className="text-[#6b4040] dark:text-[#c9a97a] mt-0.5 text-sm">
             {new Date().toLocaleDateString("en-US", {
@@ -458,7 +465,7 @@ const AdminDashboard = () => {
         <KpiCard
           label="Total Orders"
           value={analytics.total}
-          icon="📋"
+          icon={faClipboardList}
           sub="All time"
           gradient="bg-gradient-to-br from-blue-500 to-blue-700"
           animDelay={0}
@@ -466,7 +473,7 @@ const AdminDashboard = () => {
         <KpiCard
           label="Active"
           value={analytics.active}
-          icon="🔄"
+          icon={faSyncAlt}
           sub="Right now"
           gradient="bg-gradient-to-br from-amber-500 to-orange-600"
           animDelay={80}
@@ -474,7 +481,7 @@ const AdminDashboard = () => {
         <KpiCard
           label="Delivered"
           value={analytics.delivered}
-          icon="✅"
+          icon={faCheckCircle}
           sub={`${deliveryRate}% success rate`}
           gradient="bg-gradient-to-br from-emerald-500 to-teal-600"
           animDelay={160}
@@ -482,7 +489,7 @@ const AdminDashboard = () => {
         <KpiCard
           label="Revenue"
           value={`$${fmt(analytics.revenue.toFixed(0))}`}
-          icon="💰"
+          icon={faDollarSign}
           sub={`Avg $${
             analytics.delivered > 0
               ? (analytics.revenue / analytics.delivered).toFixed(2)
@@ -499,42 +506,44 @@ const AdminDashboard = () => {
           {
             label: "Total Drivers",
             value: dStats.total,
-            icon: "🚴",
+            icon: faMotorcycle,
             color:
               "bg-indigo-50 dark:bg-indigo-900/20 text-indigo-800 dark:text-indigo-300 border border-indigo-100 dark:border-indigo-900/40",
           },
           {
             label: "Available",
             value: dStats.available,
-            icon: "🟢",
+            icon: faCircle,
+            iconColor: "text-emerald-500",
             color:
               "bg-emerald-50 dark:bg-emerald-900/20 text-emerald-800 dark:text-emerald-300 border border-emerald-100 dark:border-emerald-900/40",
           },
           {
             label: "Busy",
             value: dStats.busy,
-            icon: "🟡",
+            icon: faCircle,
+            iconColor: "text-amber-500",
             color:
               "bg-amber-50 dark:bg-amber-900/20 text-amber-800 dark:text-amber-300 border border-amber-100 dark:border-amber-900/40",
           },
           {
             label: "Cancelled",
             value: analytics.cancelled,
-            icon: "❌",
+            icon: faTimesCircle,
             color:
               "bg-red-50 dark:bg-red-900/20 text-red-800 dark:text-red-300 border border-red-100 dark:border-red-900/40",
           },
           {
             label: "Delayed",
             value: delayAnalytics.delayedCount,
-            icon: "⏱️",
+            icon: faClock,
             color:
               "bg-rose-50 dark:bg-rose-900/20 text-rose-800 dark:text-rose-300 border border-rose-100 dark:border-rose-900/40",
           },
           {
             label: "Avg Delay",
             value: `${delayAnalytics.averageDelayMinutes} min`,
-            icon: "🚨",
+            icon: faExclamationTriangle,
             color:
               "bg-orange-50 dark:bg-orange-900/20 text-orange-800 dark:text-orange-300 border border-orange-100 dark:border-orange-900/40",
           },
@@ -547,7 +556,7 @@ const AdminDashboard = () => {
                 </p>
                 <p className="text-2xl font-black mt-1">{s.value}</p>
               </div>
-              <span className="text-2xl">{s.icon}</span>
+              <span className={`text-2xl ${s.iconColor || ""}`}><FontAwesomeIcon icon={s.icon} /></span>
             </div>
           </div>
         ))}
@@ -652,7 +661,7 @@ const AdminDashboard = () => {
           <Card padding="p-5">
             <div className="flex items-center justify-between mb-3">
               <h2 className="font-bold text-[#1a0a0a] dark:text-[#f8f8f8]">
-                Peak Hours Heatmap ⏰
+                Peak Hours Heatmap <FontAwesomeIcon icon={faClock} className="text-primary" />
               </h2>
               <span className="text-[10px] text-[#9e7272] flex items-center gap-1">
                 <span className="inline-block w-2.5 h-2.5 rounded-sm bg-[rgba(176,64,64,0.15)]" />
@@ -739,7 +748,7 @@ const AdminDashboard = () => {
                       <div
                         className={`w-7 h-7 rounded-full flex items-center justify-center text-xs flex-shrink-0 ${meta.color}`}
                       >
-                        {meta.icon}
+                        <FontAwesomeIcon icon={meta.icon} />
                       </div>
                       <div className="flex-1 min-w-0">
                         <p className="text-xs font-medium text-[#1a0a0a] dark:text-[#f8f8f8] leading-snug">
@@ -766,15 +775,15 @@ const AdminDashboard = () => {
                 {
                   label: "Live Tracking Center",
                   to: "/admin/live-tracking",
-                  icon: "🛰️",
+                  icon: faSatellite,
                 },
-                { label: "Demand Heatmap", to: "/admin/heatmap", icon: "🔥" },
-                { label: "Manage Orders", to: "/admin/orders", icon: "📋" },
-                { label: "Manage Drivers", to: "/admin/drivers", icon: "🚴" },
+                { label: "Demand Heatmap", to: "/admin/heatmap", icon: faFire },
+                { label: "Manage Orders", to: "/admin/orders", icon: faClipboardList },
+                { label: "Manage Drivers", to: "/admin/drivers", icon: faMotorcycle },
                 {
                   label: "Manage Customers",
                   to: "/admin/customers",
-                  icon: "👥",
+                  icon: faUsers,
                 },
               ].map((l) => (
                 <Link
@@ -782,10 +791,10 @@ const AdminDashboard = () => {
                   to={l.to}
                   className="flex items-center gap-2.5 p-2.5 rounded-xl hover:bg-[#E5D0AC]/40 dark:hover:bg-[#3d1a1a]/40 transition-colors text-sm text-[#1a0a0a] dark:text-[#f8f8f8] font-medium group"
                 >
-                  <span className="text-lg">{l.icon}</span>
+                  <span className="text-lg w-6 flex justify-center"><FontAwesomeIcon icon={l.icon} /></span>
                   <span className="flex-1">{l.label}</span>
                   <span className="text-[#9e7272] group-hover:translate-x-1 transition-transform">
-                    →
+                    <FontAwesomeIcon icon={faArrowLeft} className="rotate-180" />
                   </span>
                 </Link>
               ))}

@@ -2,6 +2,15 @@ import { useOrderStore, useAuthStore } from "@/store";
 import { DashboardLayout } from "@/layouts";
 import { Card, Button, CustomSelect } from "@/components";
 import { ORDER_STATUS } from "@/constants";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+  faCoins,
+  faStar,
+  faCalendarAlt,
+  faHistory,
+  faGlobe,
+  faInbox,
+} from "@/utils/icons";
 import { useState, useMemo } from "react";
 
 const DriverEarningsPage = () => {
@@ -60,7 +69,7 @@ const DriverEarningsPage = () => {
     <DashboardLayout role="driver">
       <div className="max-w-4xl mx-auto pb-10">
         <h1 className="font-display text-3xl font-black text-[#1a0a0a] dark:text-[#f8f8f8] mb-8">
-          Earnings Summary 💰
+          Earnings Summary <FontAwesomeIcon icon={faCoins} className="ml-2 text-amber-500" />
         </h1>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
@@ -83,7 +92,7 @@ const DriverEarningsPage = () => {
           <Card className="border-none shadow-lg">
              <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Estimated Tips</p>
              <p className="text-3xl font-black text-[#1a0a0a] dark:text-[#f8f8f8]">${(stats.deliveries * 2.5).toFixed(2)}</p>
-             <p className="text-xs text-amber-500 font-bold mt-1">⭐ 5.0 Rating</p>
+             <p className="text-xs text-amber-500 font-bold mt-1"><FontAwesomeIcon icon={faStar} className="mr-1" /> 5.0 Rating</p>
           </Card>
         </div>
 
@@ -106,9 +115,9 @@ const DriverEarningsPage = () => {
                   onChange={setPeriod}
                   className="w-40"
                   options={[
-                    { value: "this-week", label: "This Week", icon: "📅" },
-                    { value: "last-week", label: "Last Week", icon: "⏪" },
-                    { value: "all", label: "All Time", icon: "🌎" },
+                    { value: "this-week", label: "This Week", icon: faCalendarAlt },
+                    { value: "last-week", label: "Last Week", icon: faHistory },
+                    { value: "all", label: "All Time", icon: faGlobe },
                   ]}
                />
             </div>
@@ -178,7 +187,7 @@ const DriverEarningsPage = () => {
                 </div>
               ) : (
                 <div className="p-16 text-center">
-                   <div className="text-5xl mb-4">📫</div>
+                   <div className="text-5xl mb-4 text-primary/20"><FontAwesomeIcon icon={faInbox} /></div>
                    <p className="text-sm text-gray-400 font-black uppercase tracking-widest">No deliveries for this period</p>
                    <p className="text-xs text-gray-400 mt-2">Check another time range or get back on the road!</p>
                 </div>

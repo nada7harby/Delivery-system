@@ -1,4 +1,6 @@
 import { useState, useRef, useEffect } from "react";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faChevronDown, faCheck } from "@/utils/icons";
 import clsx from "clsx";
 
 const CustomSelect = ({ 
@@ -46,7 +48,7 @@ const CustomSelect = ({
         )}
       >
         <div className="flex items-center gap-2.5 truncate">
-          {icon && <span className="text-lg">{icon}</span>}
+          {icon && <span className="text-lg"><FontAwesomeIcon icon={icon} /></span>}
           <span className={clsx(
             "text-sm font-bold truncate",
             selectedOption ? "text-[#1a0a0a] dark:text-[#f8f8f8]" : "text-gray-400"
@@ -59,9 +61,7 @@ const CustomSelect = ({
           "transition-transform duration-300",
           isOpen ? "rotate-180 text-primary" : "text-gray-400"
         )}>
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M6 9l6 6 6-6" />
-          </svg>
+          <FontAwesomeIcon icon={faChevronDown} />
         </span>
       </button>
 
@@ -87,13 +87,11 @@ const CustomSelect = ({
                 )}
               >
                 <div className="flex items-center gap-2">
-                   {option.icon && <span>{option.icon}</span>}
+                   {option.icon && <span><FontAwesomeIcon icon={option.icon} /></span>}
                    {option.label}
                 </div>
                 {value === option.value && (
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round">
-                    <polyline points="20 6 9 17 4 12" />
-                  </svg>
+                  <FontAwesomeIcon icon={faCheck} />
                 )}
               </button>
             ))}

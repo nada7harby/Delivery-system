@@ -1,23 +1,31 @@
 import { useEffect, useMemo, useState } from "react";
 import { DashboardLayout } from "@/layouts";
 import { Card, CustomSelect } from "@/components";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+  faClock,
+  faCalendarAlt,
+  faBox,
+  faUtensils,
+  faCircle,
+} from "@/utils/icons";
 import HeatmapSimulationMap from "@/components/HeatmapSimulationMap";
 import { useHeatmapStore, useOrderStore, useTrackingStore } from "@/store";
 import { ORDER_STATUS, STATUS_LABELS } from "@/constants";
 import { socket } from "@/services";
 
 const TIME_OPTIONS = [
-  { value: "last-hour", label: "Last Hour", icon: "🕐" },
-  { value: "last-2-hours", label: "Last 2 Hours", icon: "🕑" },
-  { value: "today", label: "Today", icon: "📅" },
+  { value: "last-hour", label: "Last Hour", icon: faClock },
+  { value: "last-2-hours", label: "Last 2 Hours", icon: faClock },
+  { value: "today", label: "Today", icon: faCalendarAlt },
 ];
 
 const STATUS_OPTIONS = [
-  { value: "all", label: "All Statuses", icon: "📦" },
+  { value: "all", label: "All Statuses", icon: faBox },
   ...Object.values(ORDER_STATUS).map((status) => ({
     value: status,
     label: STATUS_LABELS[status],
-    icon: "•",
+    icon: faCircle,
   })),
 ];
 
@@ -129,7 +137,7 @@ const AdminHeatmapPage = () => {
           options={restaurants.map((name) => ({
             value: name,
             label: name === "all" ? "All Restaurants" : name,
-            icon: "🍽️",
+            icon: faUtensils,
           }))}
         />
         <label className="flex items-center gap-2 rounded-xl border border-[#E5D0AC] bg-white px-3 py-2.5 text-sm text-[#6b4040] dark:border-[#3d1a1a] dark:bg-[#120606] dark:text-[#c9a97a]">

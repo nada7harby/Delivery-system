@@ -2,6 +2,22 @@ import { useState, useMemo } from "react";
 import { useCartStore, useAppStore, useWishlistStore } from "@/store";
 import { MENU_ITEMS, CATEGORIES } from "@/constants";
 import { CustomerLayout } from "@/layouts";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+  faStar,
+  faShoppingCart,
+  faHeart,
+  faSyncAlt,
+  faFire,
+  faHamburger,
+  faUtensils,
+  faArrowTrendUp,
+  faGem,
+  faSatellite,
+  faMinus,
+  faCheck
+} from "@/utils/icons";
+import { faHeart as faHeartRegular } from "@fortawesome/free-regular-svg-icons";
 import { Button, Card, Badge, Modal, CustomSelect } from "@/components";
 import clsx from "clsx";
 
@@ -20,7 +36,7 @@ const ProductCard = ({ product, onQuickView }) => {
     addToast({
       type: "success",
       title: `${product.name} added!`,
-      message: "Item added to your cart 🛒",
+      message: "Item added to your cart",
     });
   };
 
@@ -30,7 +46,7 @@ const ProductCard = ({ product, onQuickView }) => {
     addToast({
       type: added ? "success" : "info",
       title: added ? "Added to wishlist" : "Removed from wishlist",
-      icon: added ? "❤️" : "🤍",
+      icon: added ? faHeart : faHeartRegular,
     });
   };
 
@@ -53,7 +69,7 @@ const ProductCard = ({ product, onQuickView }) => {
         <div className="absolute top-3 left-3 flex flex-col gap-2">
           {product.popular && (
             <div className="bg-primary text-white text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider shadow-sm">
-              🔥 Popular
+              <FontAwesomeIcon icon={faFire} className="mr-2 text-orange-500" /> Popular
             </div>
           )}
         </div>
@@ -68,7 +84,7 @@ const ProductCard = ({ product, onQuickView }) => {
               : "bg-white/80 dark:bg-black/40 text-gray-400 dark:text-gray-300 hover:scale-110 hover:text-red-500"
           )}
         >
-          {inWishlist ? "❤️" : "🤍"}
+          <FontAwesomeIcon icon={inWishlist ? faHeart : faHeartRegular} />
         </button>
 
         {/* Cart count badge */}
@@ -93,7 +109,7 @@ const ProductCard = ({ product, onQuickView }) => {
           {product.description}
         </p>
         <div className="flex items-center gap-3 text-xs text-gray-400 font-medium">
-          <span className="flex items-center gap-1">⭐ <span className="text-[#1a0a0a] dark:text-[#fef9e1]">{product.rating}</span></span>
+          <span className="flex items-center gap-1"><FontAwesomeIcon icon={faStar} className="text-amber-400" /> <span className="text-[#1a0a0a] dark:text-[#fef9e1]">{product.rating}</span></span>
           <span>•</span>
           <span>{product.prepTime}</span>
         </div>
@@ -138,13 +154,13 @@ const ProductDetailModal = ({ product, isOpen, onClose }) => {
               inWishlist ? "bg-red-500 text-white" : "bg-white text-gray-400 hover:text-red-500"
             )}
            >
-             {inWishlist ? "❤️" : "🤍"}
+             <FontAwesomeIcon icon={inWishlist ? faHeart : faHeartRegular} />
            </button>
         </div>
         <div className="flex flex-col py-2">
           <div className="flex justify-between items-center mb-4">
             <Badge status="info" className="text-sm">{product.category}</Badge>
-            <div className="flex items-center gap-1 text-amber-500 font-bold">⭐ {product.rating}</div>
+            <div className="flex items-center gap-1 text-amber-500 font-bold"><FontAwesomeIcon icon={faStar} /> {product.rating}</div>
           </div>
           <h2 className="text-3xl font-black text-[#1a0a0a] dark:text-[#fef9e1] mb-4">{product.name}</h2>
           <p className="text-2xl font-bold text-primary mb-6">${product.price.toFixed(2)}</p>
@@ -152,12 +168,12 @@ const ProductDetailModal = ({ product, isOpen, onClose }) => {
           <div className="mt-auto flex items-center gap-4">
             {quantity > 0 ? (
               <div className="flex items-center gap-4 bg-gray-100 dark:bg-gray-800 p-1.5 rounded-xl">
-                <button onClick={() => updateQuantity(product.id, quantity - 1)} className="w-10 h-10 flex items-center justify-center font-bold">−</button>
+                <button onClick={() => updateQuantity(product.id, quantity - 1)} className="w-10 h-10 flex items-center justify-center font-bold text-gray-500"><FontAwesomeIcon icon={faMinus} className="text-[10px]" /></button>
                 <span className="w-8 text-center font-black">{quantity}</span>
                 <button onClick={() => updateQuantity(product.id, quantity + 1)} className="w-10 h-10 bg-primary text-white flex items-center justify-center font-bold relative rounded-lg">+</button>
               </div>
             ) : (
-              <Button variant="primary" size="lg" className="flex-1" onClick={handleAdd}>Add to Cart 🛒</Button>
+              <Button variant="primary" size="lg" className="flex-1" onClick={handleAdd}>Add to Cart <FontAwesomeIcon icon={faShoppingCart} className="ml-1" /></Button>
             )}
           </div>
         </div>
@@ -201,7 +217,7 @@ const MenuPage = () => {
           {/* Left: Text Content */}
           <div className="order-2 lg:order-1 pt-10 lg:pt-0">
             <div className="inline-block px-4 py-1.5 bg-primary/10 text-primary font-black rounded-full text-[10px] tracking-[0.2em] uppercase mb-6 animate-bounce-slow">
-              Craving something? 🍔
+              Craving something? <FontAwesomeIcon icon={faHamburger} className="ml-2 text-primary" />
             </div>
             <h1 className="text-6xl lg:text-7xl xl:text-8xl font-black text-[#1a0a0a] dark:text-white leading-[0.9] mb-8 tracking-tighter">
               Fast <span className="text-primary italic">Flavor</span> <br />
@@ -216,7 +232,7 @@ const MenuPage = () => {
               <div className="absolute -inset-2 bg-gradient-to-r from-primary/20 to-amber-500/20 rounded-[2.5rem] blur-xl opacity-0 group-hover:opacity-100 transition duration-700"></div>
               <div className="relative flex items-center bg-white dark:bg-gray-900 rounded-[2rem] p-2 shadow-[0_20px_50px_rgba(0,0,0,0.06)] dark:shadow-none border border-gray-100 dark:border-gray-800">
                 <div className="flex-1 flex items-center px-6">
-                  <span className="text-2xl mr-4">🥡</span>
+                  <span className="text-2xl mr-4 text-primary/40"><FontAwesomeIcon icon={faUtensils} /></span>
                   <input
                     type="text"
                     placeholder="Search for pizza, coffee, salads..."
@@ -261,14 +277,14 @@ const MenuPage = () => {
                 {/* Floating Micro-UI elements */}
                 <div className="absolute top-10 right-0 bg-white dark:bg-gray-800 p-3 rounded-2xl shadow-2xl border border-gray-100 dark:border-gray-700 animate-bounce-slow z-20">
                    <div className="flex items-center gap-2">
-                       <div className="w-8 h-8 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center font-black">✔</div>
+                       <div className="w-8 h-8 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center"><FontAwesomeIcon icon={faCheck} className="text-sm" /></div>
                        <div className="text-[10px] font-black uppercase text-gray-500">Order Confirmed</div>
                    </div>
                 </div>
 
                 <div className="absolute bottom-20 -left-10 bg-primary text-white p-4 rounded-3xl shadow-2xl animate-float delay-1000 z-20">
                    <div className="flex items-center gap-2">
-                       <span className="text-2xl">🔥</span>
+                       <span className="text-2xl text-orange-500"><FontAwesomeIcon icon={faFire} /></span>
                        <div>
                           <p className="text-[8px] font-black uppercase leading-none opacity-80">Flash Deal</p>
                           <p className="text-xs font-black">50% OFF</p>
@@ -306,13 +322,13 @@ const MenuPage = () => {
              <CustomSelect
                value={sortBy}
                onChange={setSortBy}
-               icon="🔃"
+               icon={faSyncAlt}
                className="w-52"
                options={[
-                 { value: "popular", label: "Most Popular", icon: "🔥" },
-                 { value: "rating", label: "Highest Rated", icon: "⭐" },
-                 { value: "price-low", label: "Budget Friendly", icon: "📈" },
-                 { value: "price-high", label: "Premium Selection", icon: "💎" },
+                 { value: "popular", label: "Most Popular", icon: faFire },
+                 { value: "rating", label: "Highest Rated", icon: faStar },
+                 { value: "price-low", label: "Budget Friendly", icon: faArrowTrendUp },
+                 { value: "price-high", label: "Premium Selection", icon: faGem },
                ]}
              />
           </div>
@@ -321,7 +337,7 @@ const MenuPage = () => {
         {/* Results Body */}
         {filteredAndSorted.length === 0 ? (
           <div className="text-center py-32 bg-gray-50 dark:bg-gray-900/40 rounded-[3rem] border-2 border-dashed border-gray-200 dark:border-gray-800">
-            <div className="text-8xl mb-8">🛰️</div>
+            <div className="text-8xl mb-8 text-primary/20"><FontAwesomeIcon icon={faSatellite} /></div>
             <h3 className="text-3xl font-black text-[#1a0a0a] dark:text-white mb-4">Nothing on the radar</h3>
             <p className="text-[#6b4040] dark:text-gray-400 max-w-md mx-auto mb-10 text-lg">We couldn't find any dishes matching your parameters. Try broadening your search.</p>
             <Button variant="outline" onClick={() => { setSearch(""); setActiveCategory("All"); }} className="px-10 py-4 text-sm font-black border-2">Reset ALL Filters</Button>

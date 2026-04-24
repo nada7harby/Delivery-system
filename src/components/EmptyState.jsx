@@ -1,7 +1,9 @@
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faInbox } from "@/utils/icons";
 import clsx from "clsx";
 
 const EmptyState = ({
-  icon = "📭",
+  icon = faInbox,
   title = "Nothing here yet",
   description = "",
   action = null,
@@ -13,7 +15,9 @@ const EmptyState = ({
       className
     )}
   >
-    <div className="text-6xl mb-4 animate-bounce">{icon}</div>
+    <div className="text-6xl mb-4 text-[#9e7272] opacity-30 animate-pulse">
+      <FontAwesomeIcon icon={icon} />
+    </div>
     <h3 className="text-xl font-bold text-[#1a0a0a] dark:text-[#f8f8f8] mb-2">
       {title}
     </h3>

@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { motion as Motion } from "framer-motion";
-import { Heart, ShoppingCart, Trash2 } from "lucide-react";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faHeart, faShoppingCart, faTrash } from "@/utils/icons";
 import { useWishlistStore, useCartStore, useAppStore } from "@/store";
 import { CustomerLayout } from "@/layouts";
 import { Button, Card, EmptyState } from "@/components";
@@ -25,7 +26,7 @@ const WishlistItem = ({ item, onRemove, onAddToCart }) => {
             className="absolute top-3 right-3 w-9 h-9 rounded-full bg-white/90 text-[#ff4f45] flex items-center justify-center"
             aria-label="Remove from wishlist"
           >
-            <Heart size={16} className="fill-current" />
+            <FontAwesomeIcon icon={faHeart} className="fill-current" />
           </button>
         </div>
 
@@ -50,7 +51,7 @@ const WishlistItem = ({ item, onRemove, onAddToCart }) => {
               onClick={() => onAddToCart(item)}
             >
               <span className="inline-flex items-center gap-1">
-                Add <ShoppingCart size={14} />
+                Add <FontAwesomeIcon icon={faShoppingCart} className="text-xs" />
               </span>
             </Button>
             <Button
@@ -60,7 +61,7 @@ const WishlistItem = ({ item, onRemove, onAddToCart }) => {
               className="text-[#ff4f45] hover:text-[#f2552c]"
             >
               <span className="inline-flex items-center gap-1">
-                Remove <Trash2 size={14} />
+                Remove <FontAwesomeIcon icon={faTrash} className="text-xs" />
               </span>
             </Button>
           </div>
@@ -118,7 +119,7 @@ const WishlistPage = () => {
         <div className="mt-6">
           {items.length === 0 ? (
             <EmptyState
-              icon="❤️"
+              icon={faHeart}
               title="Your wishlist is empty"
               description="Save dishes you love and come back to them later."
               action={

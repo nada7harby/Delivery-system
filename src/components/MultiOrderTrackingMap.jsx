@@ -1,4 +1,11 @@
 import { useMemo, useState } from "react";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+  faCar,
+  faMotorcycle,
+  faHome,
+  faBuilding,
+} from "@/utils/icons";
 import clsx from "clsx";
 
 const padding = 0.005;
@@ -86,22 +93,7 @@ const MultiOrderTrackingMap = ({
         className,
       )}
     >
-      <div className="absolute inset-0 opacity-10">
-        {Array.from({ length: 6 }).map((_, i) => (
-          <div
-            key={`h-${i}`}
-            className="absolute w-full h-px bg-white"
-            style={{ top: `${(i + 1) * 14.2}%` }}
-          />
-        ))}
-        {Array.from({ length: 6 }).map((_, i) => (
-          <div
-            key={`v-${i}`}
-            className="absolute h-full w-px bg-white"
-            style={{ left: `${(i + 1) * 14.2}%` }}
-          />
-        ))}
-      </div>
+
 
       <svg
         className="absolute inset-0 w-full h-full z-[1]"
@@ -162,7 +154,7 @@ const MultiOrderTrackingMap = ({
                   order.isDelayed ? "bg-red-500" : "bg-primary",
                 )}
               >
-                {order.driver?.vehicleType === "Car" ? "🚗" : "🛵"}
+                <FontAwesomeIcon icon={order.driver?.vehicleType === "Car" ? faCar : faMotorcycle} className="text-white" />
               </span>
             </div>
           </button>
@@ -187,7 +179,7 @@ const MultiOrderTrackingMap = ({
             style={{ left: `${position.x}%`, top: `${position.y}%` }}
           >
             <span className="inline-flex h-9 w-9 items-center justify-center rounded-xl border-2 border-white bg-emerald-500 text-base shadow-lg">
-              🏠
+              <FontAwesomeIcon icon={faHome} className="text-white" />
             </span>
           </button>
         );
@@ -219,11 +211,11 @@ const MultiOrderTrackingMap = ({
 
       <div className="absolute bottom-3 left-3 z-30 rounded-lg bg-black/60 px-2 py-1.5 text-[10px] text-white">
         <div className="flex items-center gap-2">
-          <span>🛵</span>
+          <span><FontAwesomeIcon icon={faMotorcycle} className="text-primary" /></span>
           <span>Driver</span>
         </div>
         <div className="flex items-center gap-2">
-          <span>🏠</span>
+          <span><FontAwesomeIcon icon={faHome} className="text-emerald-500" /></span>
           <span>Customer</span>
         </div>
       </div>

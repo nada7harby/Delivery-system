@@ -1,10 +1,12 @@
-import clsx from "clsx";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faCheck } from "@/utils/icons";
 import {
   ORDER_LIFECYCLE,
   STATUS_LABELS,
   STATUS_ICONS,
   getStatusIndex,
 } from "@/constants/orderStatus";
+import clsx from "clsx";
 
 const Stepper = ({ currentStatus, compact = false }) => {
   const currentIndex = getStatusIndex(currentStatus);
@@ -32,10 +34,10 @@ const Stepper = ({ currentStatus, compact = false }) => {
                   })}
                 >
                   {isCompleted ? (
-                    <span className="text-xs">✓</span>
+                    <FontAwesomeIcon icon={faCheck} className="text-[10px]" />
                   ) : (
                     <span className={clsx("text-sm", compact ? "text-xs" : "")}>
-                      {STATUS_ICONS[step]}
+                      <FontAwesomeIcon icon={STATUS_ICONS[step]} />
                     </span>
                   )}
                 </div>

@@ -21,6 +21,7 @@ const AdminLiveTrackingPage = () => {
     delayedOrderIds,
     riskOrderIds,
     delayedAlerts,
+    upsertDriverLocation,
     startDelayMonitoring,
     processDelayChecks,
   } = useTrackingStore();
@@ -33,6 +34,39 @@ const AdminLiveTrackingPage = () => {
     startDelayMonitoring();
     processDelayChecks();
 
+    // Simulation for demo: update driver locations periodically
+    const simInterval = setInterval(() => {
+      // Use getState() to avoid dependency loop and get fresh data
+      const currentOrders = useOrderStore.getState().orders;
+      const currentDriverLocations = useTrackingStore.getState().driverLocations;
+
+      const activeOrders = currentOrders.filter(
+        (o) =>
+          o.status !== ORDER_STATUS.DELIVERED &&
+          o.status !== ORDER_STATUS.CANCELLED,
+      );
+
+      activeOrders.forEach((order) => {
+        if (!order.driverId) return;
+        
+        const currentLoc = currentDriverLocations[order.driverId] || order.driver?.currentLocation;
+        if (!currentLoc) return;
+
+        // Move slightly toward customer or just random jitter if already there
+        const target = order.deliveryLocation || currentLoc;
+        
+        const nextLat = currentLoc.lat + (target.lat - currentLoc.lat) * 0.1 + (Math.random() - 0.5) * 0.0002;
+        const nextLng = currentLoc.lng + (target.lng - currentLoc.lng) * 0.1 + (Math.random() - 0.5) * 0.0002;
+
+        upsertDriverLocation({
+          driverId: order.driverId,
+          lat: nextLat,
+          lng: nextLng,
+          timestamp: new Date().toISOString()
+        }, { emit: false });
+      });
+    }, 5000);
+
     const onOrderDelayed = (payload) => {
       addToast({
         type: "warning",
@@ -43,9 +77,10 @@ const AdminLiveTrackingPage = () => {
 
     socket.on("order-delayed", onOrderDelayed);
     return () => {
+      clearInterval(simInterval);
       socket.off("order-delayed", onOrderDelayed);
     };
-  }, [addToast, processDelayChecks, startDelayMonitoring]);
+  }, [addToast, processDelayChecks, startDelayMonitoring, upsertDriverLocation]);
 
   const activeOrders = useMemo(
     () =>

@@ -32,15 +32,25 @@ export const STATUS_COLORS = {
   [ORDER_STATUS.CANCELLED]: "status-cancelled",
 };
 
+import {
+  faClock,
+  faCheck,
+  faUtensils,
+  faBox,
+  faMotorcycle,
+  faCheckCircle,
+  faTimesCircle,
+} from "@/utils/icons";
+
 export const STATUS_ICONS = {
-  [ORDER_STATUS.PENDING]: "⏳",
-  [ORDER_STATUS.CONFIRMED]: "✅",
-  [ORDER_STATUS.PREPARING]: "👨‍🍳",
-  [ORDER_STATUS.READY]: "📦",
-  [ORDER_STATUS.PICKED_UP]: "🛵",
-  [ORDER_STATUS.ON_THE_WAY]: "🚴",
-  [ORDER_STATUS.DELIVERED]: "🎉",
-  [ORDER_STATUS.CANCELLED]: "❌",
+  [ORDER_STATUS.PENDING]: faClock,
+  [ORDER_STATUS.CONFIRMED]: faCheck,
+  [ORDER_STATUS.PREPARING]: faUtensils,
+  [ORDER_STATUS.READY]: faBox,
+  [ORDER_STATUS.PICKED_UP]: faMotorcycle,
+  [ORDER_STATUS.ON_THE_WAY]: faMotorcycle,
+  [ORDER_STATUS.DELIVERED]: faCheckCircle,
+  [ORDER_STATUS.CANCELLED]: faTimesCircle,
 };
 
 // Valid status transitions: key -> allowed next statuses

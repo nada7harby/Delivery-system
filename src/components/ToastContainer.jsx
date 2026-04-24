@@ -1,19 +1,20 @@
 import useAppStore from "@/store/appStore";
 import clsx from "clsx";
 import { AnimatePresence, motion as Motion } from "framer-motion";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
-  AlertCircle,
-  AlertTriangle,
-  CheckCircle2,
-  Info,
-  X,
-} from "lucide-react";
+  faCheckCircle,
+  faExclamationCircle,
+  faInfoCircle,
+  faExclamationTriangle,
+  faTimes,
+} from "@/utils/icons";
 
 const ICONS = {
-  success: CheckCircle2,
-  error: AlertCircle,
-  info: Info,
-  warning: AlertTriangle,
+  success: faCheckCircle,
+  error: faExclamationCircle,
+  info: faInfoCircle,
+  warning: faExclamationTriangle,
 };
 
 const BG = {
@@ -46,7 +47,7 @@ const ToastItem = ({ toast }) => {
       className={clsx("toast border pointer-events-auto", BG[type])}
     >
       <span className="text-xl flex-shrink-0">
-        <Icon size={18} />
+        <FontAwesomeIcon icon={Icon} className="text-lg" />
       </span>
       <div className="flex-1 min-w-0">
         {toast.title && (
@@ -67,7 +68,7 @@ const ToastItem = ({ toast }) => {
           TEXT[type],
         )}
       >
-        <X size={14} />
+        <FontAwesomeIcon icon={faTimes} className="text-xs" />
       </button>
     </Motion.div>
   );

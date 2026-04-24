@@ -2,6 +2,18 @@ import { useState, useMemo } from "react";
 import { useOrderStore } from "@/store";
 import { DashboardLayout } from "@/layouts";
 import { Card, Badge, Button, Modal, EmptyState } from "@/components";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+  faPhone,
+  faMapMarkerAlt,
+  faClipboardList,
+  faCheck,
+  faDollarSign,
+  faUsers,
+  faCircle,
+  faClock,
+  faSearch,
+} from "@/utils/icons";
 import { ORDER_STATUS } from "@/constants";
 import clsx from "clsx";
 
@@ -53,20 +65,20 @@ const CustomerDetailModal = ({ customer, onClose }) => {
         <div>
           <p className="font-bold text-[#1a0a0a] dark:text-[#f8f8f8]">{name}</p>
           <p className="text-xs text-[#6b4040] dark:text-[#c9a97a] font-mono">ID: {customerId}</p>
-          {orders[0]?.customerPhone && <p className="text-sm text-[#6b4040] dark:text-[#c9a97a]">📱 {orders[0].customerPhone}</p>}
-          {orders[0]?.customerAddress && <p className="text-sm text-[#6b4040] dark:text-[#c9a97a] truncate">📍 {orders[0].customerAddress}</p>}
+          {orders[0]?.customerPhone && <p className="text-sm text-[#6b4040] dark:text-[#c9a97a]"><FontAwesomeIcon icon={faPhone} className="text-[10px] mr-1" /> {orders[0].customerPhone}</p>}
+          {orders[0]?.customerAddress && <p className="text-sm text-[#6b4040] dark:text-[#c9a97a] truncate"><FontAwesomeIcon icon={faMapMarkerAlt} className="text-[10px] mr-1" /> {orders[0].customerAddress}</p>}
         </div>
       </div>
 
       {/* Stats */}
       <div className="grid grid-cols-3 gap-3 mb-4">
         {[
-          { label: "Orders", value: orders.length, icon: "📋" },
-          { label: "Delivered", value: delivered, icon: "✅" },
-          { label: "Total Spent", value: `$${totalSpend.toFixed(0)}`, icon: "💰" },
+          { label: "Orders", value: orders.length, icon: faClipboardList },
+          { label: "Delivered", value: delivered, icon: faCheck },
+          { label: "Total Spent", value: `$${totalSpend.toFixed(0)}`, icon: faDollarSign },
         ].map((s) => (
           <div key={s.label} className="text-center p-3 bg-[#f8f8f8] dark:bg-[#430000] rounded-xl">
-            <div className="text-xl">{s.icon}</div>
+            <div className="text-xl"><FontAwesomeIcon icon={s.icon} /></div>
             <div className="text-lg font-black text-[#1a0a0a] dark:text-[#f8f8f8]">{s.value}</div>
             <div className="text-[10px] text-[#9e7272]">{s.label}</div>
           </div>
@@ -176,7 +188,7 @@ const AdminCustomersPage = () => {
     <DashboardLayout role="admin">
       <div className="mb-6 flex items-center justify-between flex-wrap gap-3">
         <div>
-          <h1 className="font-display text-2xl font-bold text-[#1a0a0a] dark:text-[#f8f8f8]">Customers 👥</h1>
+          <h1 className="font-display text-2xl font-bold text-[#1a0a0a] dark:text-[#f8f8f8]">Customers <FontAwesomeIcon icon={faUsers} className="text-primary" /></h1>
           <p className="text-[#6b4040] dark:text-[#c9a97a] mt-0.5 text-sm">{customers.length} registered customers</p>
         </div>
       </div>
@@ -184,10 +196,10 @@ const AdminCustomersPage = () => {
       {/* Summary KPIs */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
         {[
-          { label: "Total",    value: customers.length, icon: "👥", cls: "from-blue-500 to-blue-700" },
-          { label: "Active Now", value: enriched.filter((c) => c.status==="active").length,   icon: "🟢", cls: "from-amber-500 to-orange-600" },
-          { label: "Recent",   value: enriched.filter((c) => c.status==="recent").length,   icon: "🕐", cls: "from-purple-500 to-purple-700" },
-          { label: "Revenue",  value: `$${totalRevenue.toFixed(0)}`, icon: "💰", cls: "from-emerald-500 to-teal-600" },
+          { label: "Total",    value: customers.length, icon: faUsers, cls: "from-blue-500 to-blue-700" },
+          { label: "Active Now", value: enriched.filter((c) => c.status==="active").length,   icon: faCircle, iconCls: "text-emerald-500", cls: "from-amber-500 to-orange-600" },
+          { label: "Recent",   value: enriched.filter((c) => c.status==="recent").length,   icon: faClock, cls: "from-purple-500 to-purple-700" },
+          { label: "Revenue",  value: `$${totalRevenue.toFixed(0)}`, icon: faDollarSign, cls: "from-emerald-500 to-teal-600" },
         ].map((k) => (
           <div key={k.label} className={`bg-gradient-to-br ${k.cls} rounded-2xl p-4 text-white shadow-lg`}>
             <div className="flex items-center justify-between">
@@ -195,7 +207,7 @@ const AdminCustomersPage = () => {
                 <p className="text-white/70 text-xs uppercase tracking-widest">{k.label}</p>
                 <p className="text-2xl font-black mt-0.5">{k.value}</p>
               </div>
-              <span className="text-2xl opacity-80">{k.icon}</span>
+              <span className={`text-2xl opacity-80 ${k.iconCls || ""}`}><FontAwesomeIcon icon={k.icon} /></span>
             </div>
           </div>
         ))}
@@ -205,7 +217,7 @@ const AdminCustomersPage = () => {
       <Card className="mb-5">
         <div className="flex flex-col sm:flex-row gap-3">
           <div className="relative flex-1">
-            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm">🔍</span>
+            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-[#9e7272]"><FontAwesomeIcon icon={faSearch} /></span>
             <input type="text" placeholder="Search by name or ID..." value={search} onChange={(e) => setSearch(e.target.value)} className="input pl-9" />
           </div>
           <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} className="input w-full sm:w-40">
@@ -224,7 +236,7 @@ const AdminCustomersPage = () => {
 
       {/* Table */}
       {filtered.length === 0 ? (
-        <EmptyState icon="👥" title="No customers found" description="Try adjusting your search or filter"
+        <EmptyState icon={faUsers} title="No customers found" description="Try adjusting your search or filter"
           action={<Button variant="secondary" onClick={() => { setSearch(""); setStatusFilter("all"); }}>Clear Filters</Button>} />
       ) : (
         <div className="table-wrapper">

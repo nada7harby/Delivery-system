@@ -15,6 +15,19 @@ import {
   Modal,
   MapSimulation,
 } from "@/components";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+  faArrowLeft,
+  faMapMarkerAlt,
+  faTimesCircle,
+  faCheck,
+  faPhone,
+  faStickyNote,
+  faStar,
+  faTrophy,
+  faMotorcycle,
+  faQuestionCircle,
+} from "@/utils/icons";
 import { ORDER_STATUS, STATUS_LABELS, STATUS_TRANSITIONS } from "@/constants";
 
 const AdminOrderDetailPage = () => {
@@ -49,7 +62,7 @@ const AdminOrderDetailPage = () => {
     return (
       <DashboardLayout role="admin">
         <div className="text-center py-16">
-          <div className="text-5xl mb-3">❓</div>
+          <div className="text-5xl mb-3 text-primary/40"><FontAwesomeIcon icon={faQuestionCircle} /></div>
           <p className="font-bold text-[#1a0a0a] dark:text-[#f8f8f8] mb-2">
             Order not found
           </p>
@@ -142,7 +155,7 @@ const AdminOrderDetailPage = () => {
             onClick={() => navigate("/admin/orders")}
             className="w-9 h-9 flex items-center justify-center rounded-lg hover:bg-[#E5D0AC]/50 dark:hover:bg-[#3d1a1a]/50 text-[#6b4040] dark:text-[#c9a97a] transition-colors"
           >
-            ←
+            <FontAwesomeIcon icon={faArrowLeft} />
           </button>
           <div className="flex-1">
             <h1 className="font-display text-xl font-bold text-[#1a0a0a] dark:text-[#f8f8f8]">
@@ -163,7 +176,7 @@ const AdminOrderDetailPage = () => {
             <Card padding="p-0">
               <div className="px-5 py-4 border-b border-[#E5D0AC] dark:border-[#3d1a1a]">
                 <h2 className="font-bold text-[#1a0a0a] dark:text-[#f8f8f8]">
-                  📍 Live Map
+                  <FontAwesomeIcon icon={faMapMarkerAlt} className="text-primary mr-2" /> Live Map
                 </h2>
               </div>
               <MapSimulation
@@ -182,7 +195,7 @@ const AdminOrderDetailPage = () => {
               </h2>
               {order.status === ORDER_STATUS.CANCELLED ? (
                 <div className="text-center py-4 text-red-500 font-bold">
-                  ❌ Order Cancelled
+                  <FontAwesomeIcon icon={faTimesCircle} /> Order Cancelled
                 </div>
               ) : (
                 <Stepper currentStatus={order.status} />
@@ -250,7 +263,7 @@ const AdminOrderDetailPage = () => {
                 {[...order.timeline].reverse().map((entry, i) => (
                   <div key={i} className="flex items-start gap-3 text-sm">
                     <div className="w-7 h-7 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0 text-sm">
-                      ✓
+                      <FontAwesomeIcon icon={faCheck} className="text-[10px] text-primary" />
                     </div>
                     <div>
                       <p className="font-semibold text-[#1a0a0a] dark:text-[#f8f8f8]">
@@ -281,11 +294,11 @@ const AdminOrderDetailPage = () => {
                 <p className="font-bold text-[#1a0a0a] dark:text-[#f8f8f8]">
                   {order.customerName}
                 </p>
-                {order.customerPhone && <p>📱 {order.customerPhone}</p>}
-                <p>📍 {order.customerAddress}</p>
+                {order.customerPhone && <p><FontAwesomeIcon icon={faPhone} className="text-[10px] mr-1" /> {order.customerPhone}</p>}
+                <p><FontAwesomeIcon icon={faMapMarkerAlt} className="text-[10px] mr-1" /> {order.customerAddress}</p>
                 {order.notes && (
                   <p className="p-2 bg-amber-50 dark:bg-amber-900/20 rounded-lg text-amber-700 dark:text-amber-300">
-                    📝 {order.notes}
+                    <FontAwesomeIcon icon={faStickyNote} className="text-[10px] mr-1" /> {order.notes}
                   </p>
                 )}
               </div>
@@ -322,7 +335,7 @@ const AdminOrderDetailPage = () => {
                       {order.driver.name}
                     </p>
                     <p className="text-xs text-[#6b4040] dark:text-[#c9a97a]">
-                      ⭐ {order.driver.rating}
+                      <FontAwesomeIcon icon={faStar} className="text-[10px] text-amber-400 mr-1" /> {order.driver.rating}
                     </p>
                   </div>
                 </div>
@@ -371,7 +384,7 @@ const AdminOrderDetailPage = () => {
                         setShowForceStatus(true);
                       }}
                     >
-                      Force → {STATUS_LABELS[allowedNextStatuses[0]]}
+                      Force <FontAwesomeIcon icon={faArrowLeft} className="mx-1 rotate-180" /> {STATUS_LABELS[allowedNextStatuses[0]]}
                     </Button>
                   )}
                 {order.status !== ORDER_STATUS.CANCELLED && (
@@ -399,7 +412,7 @@ const AdminOrderDetailPage = () => {
                 )}
                 {order.status === ORDER_STATUS.DELIVERED && (
                   <div className="text-center text-emerald-600 dark:text-emerald-400 font-bold py-2">
-                    🎉 Delivered!
+                    <FontAwesomeIcon icon={faTrophy} className="text-emerald-500 mr-2" /> Delivered!
                   </div>
                 )}
               </div>
@@ -419,7 +432,7 @@ const AdminOrderDetailPage = () => {
                         s <= order.rating ? "text-amber-400" : "text-gray-300"
                       }`}
                     >
-                      ★
+                      <FontAwesomeIcon icon={faStar} />
                     </span>
                   ))}
                 </div>
@@ -438,7 +451,7 @@ const AdminOrderDetailPage = () => {
       <Modal
         isOpen={showAssignDriver}
         onClose={() => setShowAssignDriver(false)}
-        title="Assign Driver 🛵"
+        title={<span>Assign Driver <FontAwesomeIcon icon={faMotorcycle} className="text-primary ml-1" /></span>}
         footer={
           <>
             <Button variant="ghost" onClick={() => setShowAssignDriver(false)}>
@@ -474,7 +487,7 @@ const AdminOrderDetailPage = () => {
                   {driver.name}
                 </p>
                 <p className="text-xs text-[#6b4040] dark:text-[#c9a97a]">
-                  ⭐ {driver.rating} · {driver.vehicleType} ·{" "}
+                  <FontAwesomeIcon icon={faStar} className="text-[10px] text-amber-400 mr-1" /> {driver.rating} · {driver.vehicleType} ·{" "}
                   {driver.deliveries} deliveries
                 </p>
               </div>

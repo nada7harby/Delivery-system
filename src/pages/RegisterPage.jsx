@@ -3,6 +3,16 @@ import { Link, useNavigate } from "react-router-dom";
 import { useAuthStore, useAppStore } from "@/store";
 import Button from "@/components/Button";
 import Input from "@/components/Input";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+  faRocket,
+  faUser,
+  faMotorcycle,
+  faUserTie,
+  faEnvelope,
+  faLock,
+  faChevronDown,
+} from "@/utils/icons";
 
 const RegisterPage = () => {
   const navigate = useNavigate();
@@ -52,22 +62,22 @@ const RegisterPage = () => {
       <div className="hidden lg:flex flex-col justify-center items-center w-1/2 bg-gradient-brand relative overflow-hidden px-12">
         <div className="absolute inset-0 bg-dots opacity-20" />
         <div className="relative z-10 text-center text-white">
-          <div className="text-8xl mb-6">🚀</div>
+          <div className="text-8xl mb-6 text-white/20"><FontAwesomeIcon icon={faRocket} /></div>
           <h1 className="font-display text-4xl font-black mb-4">Join QuickBite</h1>
           <p className="text-xl opacity-90 font-light max-w-sm">
             Start ordering your favorite food in seconds
           </p>
           <div className="mt-10 grid grid-cols-3 gap-4">
             {[
-              { icon: "👤", role: "Customer", desc: "Order food" },
-              { icon: "🛵", role: "Driver", desc: "Deliver orders" },
-              { icon: "👔", role: "Admin", desc: "Manage all" },
+              { icon: faUser, role: "Customer", desc: "Order food" },
+              { icon: faMotorcycle, role: "Driver", desc: "Deliver orders" },
+              { icon: faUserTie, role: "Admin", desc: "Manage all" },
             ].map((r) => (
               <div
                 key={r.role}
                 className="bg-white/10 rounded-xl p-4 text-center backdrop-blur-sm border border-white/20"
               >
-                <div className="text-3xl mb-1">{r.icon}</div>
+                <div className="text-3xl mb-1"><FontAwesomeIcon icon={r.icon} /></div>
                 <div className="font-bold text-sm">{r.role}</div>
                 <div className="text-xs opacity-70">{r.desc}</div>
               </div>
@@ -89,7 +99,7 @@ const RegisterPage = () => {
           </div>
 
           <h2 className="font-display text-3xl font-bold text-[#1a0a0a] dark:text-[#f8f8f8] mb-2">
-            Create account ✨
+            Create account
           </h2>
           <p className="text-[#6b4040] dark:text-[#c9a97a] mb-8">
             Join thousands of happy customers
@@ -101,7 +111,7 @@ const RegisterPage = () => {
               placeholder="John Doe"
               value={form.name}
               onChange={(e) => setForm({ ...form, name: e.target.value })}
-              icon="👤"
+              icon={<FontAwesomeIcon icon={faUser} />}
               required
             />
             <Input
@@ -110,33 +120,24 @@ const RegisterPage = () => {
               placeholder="you@example.com"
               value={form.email}
               onChange={(e) => setForm({ ...form, email: e.target.value })}
-              icon="📧"
+              icon={<FontAwesomeIcon icon={faEnvelope} />}
               required
             />
 
             {/* Role selector */}
             <div>
               <label className="input-label">Account Type</label>
-              <div className="grid grid-cols-3 gap-2 mt-1.5">
-                {[
-                  { value: "customer", icon: "👤", label: "Customer" },
-                  { value: "driver", icon: "🛵", label: "Driver" },
-                  { value: "admin", icon: "👔", label: "Admin" },
-                ].map((r) => (
-                  <button
-                    type="button"
-                    key={r.value}
-                    onClick={() => setForm({ ...form, role: r.value })}
-                    className={`flex flex-col items-center gap-1 px-3 py-3 rounded-xl border-2 transition-all ${
-                      form.role === r.value
-                        ? "border-primary bg-primary/10 text-primary"
-                        : "border-[#E5D0AC] dark:border-[#3d1a1a] hover:border-primary/50"
-                    }`}
-                  >
-                    <span className="text-2xl">{r.icon}</span>
-                    <span className="text-xs font-semibold">{r.label}</span>
-                  </button>
-                ))}
+              <div className="relative">
+                <select
+                  className="w-full p-3 rounded-xl border border-[#E5D0AC] dark:border-[#3d1a1a] bg-transparent"
+                  value={form.role}
+                  onChange={(e) => setForm({ ...form, role: e.target.value })}
+                >
+                  <option value="customer">Customer — Order food</option>
+                  <option value="driver">Driver — Deliver orders</option>
+                  <option value="admin">Admin — Manage all</option>
+                </select>
+                <FontAwesomeIcon icon={faChevronDown} className="absolute right-4 top-1/2 -translate-y-1/2 text-[#9e7272] pointer-events-none" />
               </div>
             </div>
 
@@ -146,7 +147,7 @@ const RegisterPage = () => {
               placeholder="Min 6 characters"
               value={form.password}
               onChange={(e) => setForm({ ...form, password: e.target.value })}
-              icon="🔒"
+              icon={<FontAwesomeIcon icon={faLock} />}
               required
             />
             <Input
@@ -157,7 +158,7 @@ const RegisterPage = () => {
               onChange={(e) =>
                 setForm({ ...form, confirmPassword: e.target.value })
               }
-              icon="🔒"
+              icon={<FontAwesomeIcon icon={faLock} />}
               required
             />
 

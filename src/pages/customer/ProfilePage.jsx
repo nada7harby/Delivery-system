@@ -1,13 +1,14 @@
 import { useState } from "react";
 import { motion as Motion } from "framer-motion";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
-  Bell,
-  Mail,
-  MapPin,
-  Phone,
-  ShieldCheck,
-  UserRound,
-} from "lucide-react";
+  faBell,
+  faEnvelope,
+  faMapMarkerAlt,
+  faPhone,
+  faShieldAlt,
+  faUser,
+} from "@/utils/icons";
 import { useAuthStore, useAppStore } from "@/store";
 import { CustomerLayout } from "@/layouts";
 import { Button, Card, Input } from "@/components";
@@ -19,7 +20,7 @@ const PreferenceRow = ({ icon, title, subtitle, enabled = false }) => {
     <div className="flex items-center justify-between p-3 rounded-2xl bg-white/70 dark:bg-[#1a3440] border border-[#d9e7ee] dark:border-[#2d4d5b]">
       <div className="flex items-center gap-3">
         <div className="w-9 h-9 rounded-xl bg-[#edf4f8] dark:bg-[#22414d] flex items-center justify-center text-[#3a5b69] dark:text-[#bcd4df]">
-          <RowIcon size={16} />
+          <FontAwesomeIcon icon={icon} className="text-sm" />
         </div>
         <div>
           <p className="text-sm font-semibold text-[#163643] dark:text-[#f2fbff]">
@@ -130,7 +131,7 @@ const ProfilePage = () => {
                   onChange={(event) =>
                     setForm({ ...form, name: event.target.value })
                   }
-                  icon={<UserRound size={14} />}
+                  icon={<FontAwesomeIcon icon={faUser} className="text-xs" />}
                 />
 
                 <Input
@@ -138,7 +139,7 @@ const ProfilePage = () => {
                   type="email"
                   value={form.email}
                   disabled
-                  icon={<Mail size={14} />}
+                   icon={<FontAwesomeIcon icon={faEnvelope} className="text-xs" />}
                   hint="Contact support to change email"
                 />
 
@@ -149,12 +150,12 @@ const ProfilePage = () => {
                   onChange={(event) =>
                     setForm({ ...form, phone: event.target.value })
                   }
-                  icon={<Phone size={14} />}
+                  icon={<FontAwesomeIcon icon={faPhone} className="text-xs" />}
                 />
 
                 <div>
                   <label className="input-label inline-flex items-center gap-1">
-                    <MapPin size={13} /> Default Delivery Address
+                    <FontAwesomeIcon icon={faMapMarkerAlt} className="text-xs" /> Default Delivery Address
                   </label>
                   <textarea
                     className="input min-h-[110px] py-3"
@@ -202,23 +203,23 @@ const ProfilePage = () => {
           >
             <Card className="rounded-3xl border-white/60 bg-white/85 shadow-lg backdrop-blur-sm dark:border-[#284754] dark:bg-[#17303b]/80">
               <h3 className="font-display font-bold text-lg text-[#13313e] dark:text-[#f3fbff] mb-3 inline-flex items-center gap-2">
-                <Bell size={16} /> Preferences
+                <FontAwesomeIcon icon={faBell} className="text-base" /> Preferences
               </h3>
               <div className="space-y-3">
                 <PreferenceRow
-                  icon={Bell}
+                  icon={faBell}
                   title="Push Notifications"
                   subtitle="Get real-time delivery updates"
                   enabled
                 />
                 <PreferenceRow
-                  icon={ShieldCheck}
+                  icon={faShieldAlt}
                   title="Order Security Alerts"
                   subtitle="Notify on suspicious login/activity"
                   enabled
                 />
                 <PreferenceRow
-                  icon={Mail}
+                  icon={faEnvelope}
                   title="Marketing Emails"
                   subtitle="Offers and weekly recommendations"
                   enabled={false}

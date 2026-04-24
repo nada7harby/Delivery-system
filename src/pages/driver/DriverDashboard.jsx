@@ -11,6 +11,21 @@ import { DashboardLayout } from "@/layouts";
 import { Card, Badge, Button } from "@/components";
 import { ORDER_STATUS } from "@/constants";
 import { socket } from "@/services";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+  faSyncAlt,
+  faCoins,
+  faCheckCircle,
+  faStar,
+  faBed,
+  faFire,
+  faHome,
+  faClock,
+  faInbox,
+  faPizzaSlice,
+  faHamburger,
+  faChevronRight,
+} from "@/utils/icons";
 import clsx from "clsx";
 
 const DriverDashboard = () => {
@@ -26,7 +41,7 @@ const DriverDashboard = () => {
   } = useDriverStore();
   const { upsertDriverLocation, delayedOrderIds } = useTrackingStore();
 
-  const loggedDriver = getDriverByUser(user);
+  const loggedDriver = getDriverByUser(user); // current driver profile
 
   useEffect(() => {
     seedOrders(user?.id);
@@ -144,31 +159,33 @@ const DriverDashboard = () => {
     {
       label: "Active Orders",
       value: activeOrders.length,
-      icon: "🔄",
+      icon: faSyncAlt,
       color: "bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300",
     },
     {
       label: "Today's Earnings",
       value: `$${dailyEarnings.toFixed(2)}`,
-      icon: "💰",
+      icon: faCoins,
       color:
         "bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-300",
     },
     {
       label: "Completed Today",
       value: completedToday.length,
-      icon: "✅",
+      icon: faCheckCircle,
       color:
         "bg-purple-50 dark:bg-purple-900/20 text-purple-700 dark:text-purple-300",
     },
     {
       label: "My Rating",
-      value: "4.9 ⭐",
-      icon: "⭐",
+      value: <>{loggedDriver?.rating || "4.9"} <FontAwesomeIcon icon={faStar} className="text-amber-400 text-xs" /></>,
+      icon: faStar,
       color:
         "bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-300",
     },
   ];
+
+  const statsWithIcons = stats.map(s => ({...s, icon: <FontAwesomeIcon icon={s.icon} />}));
 
   const handleToggleOnline = () => {
     const newStatus = !isOnline;
@@ -183,7 +200,7 @@ const DriverDashboard = () => {
 
     addToast({
       type: newStatus ? "success" : "info",
-      title: newStatus ? "You are Online! 🟢" : "You are Offline 🔴",
+      title: newStatus ? "You are Online!" : "You are Offline",
       message: newStatus
         ? "You can now receive new order assignments."
         : "Go online to start receiving orders.",
@@ -196,7 +213,7 @@ const DriverDashboard = () => {
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
         <div>
           <h1 className="font-display text-3xl font-black text-[#1a0a0a] dark:text-[#f8f8f8]">
-            Hello, {user?.name?.split(" ")[0]}! 👋
+            Hello, {user?.name?.split(" ")[0]}!
           </h1>
           <p className="text-[#6b4040] dark:text-[#c9a97a] mt-1 font-medium italic">
             Ready for your shifts today?
@@ -227,7 +244,7 @@ const DriverDashboard = () => {
 
       {/* Stats Grid */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
-        {stats.map((stat) => (
+        {statsWithIcons.map((stat) => (
           <Card
             key={stat.label}
             className={clsx(stat.color, "border-none shadow-sm")}
@@ -254,7 +271,7 @@ const DriverDashboard = () => {
 
       {!isOnline && (
         <Card className="mb-8 border-dashed border-2 border-gray-200 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-900/20 text-center py-12">
-          <div className="text-5xl mb-4">💤</div>
+          <div className="text-5xl mb-4 text-primary/20"><FontAwesomeIcon icon={faBed} /></div>
           <h2 className="text-xl font-bold text-[#1a0a0a] dark:text-[#f8f8f8] mb-2">
             You are currently offline
           </h2>
@@ -277,7 +294,7 @@ const DriverDashboard = () => {
         <section>
           <div className="flex items-center justify-between mb-4 px-2">
             <h2 className="text-xl font-black text-[#1a0a0a] dark:text-[#f8f8f8] flex items-center gap-2">
-              <span className="text-primary">⚡</span> Active Deliveries
+              <span className="text-primary"><FontAwesomeIcon icon={faFire} /></span> Active Deliveries
             </h2>
             <Link
               to="/driver/orders"
@@ -306,13 +323,13 @@ const DriverDashboard = () => {
                     </div>
                     <div className="space-y-2 mb-4">
                       <p className="text-xs flex items-center gap-2 text-[#6b4040] dark:text-[#c9a97a]">
-                        <span className="w-4">🏠</span>
+                        <span className="w-4"><FontAwesomeIcon icon={faHome} /></span>
                         <span className="truncate">
                           {order.customerAddress}
                         </span>
                       </p>
                       <p className="text-xs flex items-center gap-2 text-[#6b4040] dark:text-[#c9a97a]">
-                        <span className="w-4">⏲️</span>
+                        <span className="w-4"><FontAwesomeIcon icon={faClock} /></span>
                         <span>
                           Ordered{" "}
                           {new Date(order.createdAt).toLocaleTimeString([], {
@@ -326,8 +343,8 @@ const DriverDashboard = () => {
                       <span className="font-bold text-primary">
                         ${order.total?.toFixed(2)}
                       </span>
-                      <span className="text-[10px] font-bold text-gray-400 group-hover:text-primary transition-colors">
-                        START NAVIGATION ›
+                      <span className="text-[10px] font-bold text-gray-400 group-hover:text-primary transition-colors flex items-center gap-1">
+                        START NAVIGATION <FontAwesomeIcon icon={faChevronRight} className="text-[8px]" />
                       </span>
                     </div>
                   </Card>
@@ -341,14 +358,14 @@ const DriverDashboard = () => {
         <section>
           <div className="flex items-center justify-between mb-4 px-2">
             <h2 className="text-xl font-black text-[#1a0a0a] dark:text-[#f8f8f8] flex items-center gap-2">
-              <span className="text-amber-500">📥</span> Available Near You
+              <span className="text-amber-500"><FontAwesomeIcon icon={faInbox} /></span> Available Near You
             </h2>
           </div>
 
           <div className="space-y-4">
             {pendingOrders.length === 0 ? (
               <Card className="text-center py-10 bg-white/40 dark:bg-black/20 border-gray-100 dark:border-gray-800">
-                <div className="animate-spin-slow inline-block mb-2">🍕</div>
+                <div className="animate-spin-slow inline-block mb-2 text-3xl text-primary/20"><FontAwesomeIcon icon={faPizzaSlice} /></div>
                 <p className="text-sm text-[#6b4040] dark:text-[#c9a97a]">
                   Scanning for new orders...
                 </p>
@@ -370,7 +387,11 @@ const DriverDashboard = () => {
                     </div>
                     <div className="flex items-center gap-4 mb-4">
                       <div className="w-10 h-10 rounded-xl bg-white dark:bg-gray-800 flex items-center justify-center text-xl shadow-sm">
-                        {order.items?.[0]?.image || "🍔"}
+                        {order.items?.[0]?.image ? (
+                           <img src={order.items[0].image} alt="Dish" className="w-full h-full object-cover" />
+                        ) : (
+                           <FontAwesomeIcon icon={faHamburger} className="text-primary/20" />
+                        )}
                       </div>
                       <div className="flex-1 min-w-0">
                         <p className="text-xs font-bold text-[#1a0a0a] dark:text-[#f8f8f8] truncate">

@@ -3,6 +3,14 @@ import { Link } from "react-router-dom";
 import { useOrderStore } from "@/store";
 import { DashboardLayout } from "@/layouts";
 import { Card, Badge, Button, EmptyState, CustomSelect } from "@/components";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+  faClipboardList,
+  faSearch,
+  faCheck,
+  faTimesCircle,
+  faClock,
+} from "@/utils/icons";
 import { ORDER_STATUS, STATUS_LABELS } from "@/constants";
 
 const ALL_STATUSES = ["all", ...Object.values(ORDER_STATUS)];
@@ -28,7 +36,7 @@ const AdminOrdersPage = () => {
     <DashboardLayout role="admin">
       <div className="mb-6">
         <h1 className="font-display text-2xl font-bold text-[#1a0a0a] dark:text-[#f8f8f8]">
-          All Orders 📋
+          All Orders <FontAwesomeIcon icon={faClipboardList} className="text-primary" />
         </h1>
         <p className="text-[#6b4040] dark:text-[#c9a97a] mt-1">
           {filtered.length} of {orders.length} orders
@@ -40,8 +48,8 @@ const AdminOrdersPage = () => {
         <div className="flex flex-col sm:flex-row gap-3">
           {/* Search */}
           <div className="relative flex-1">
-            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm">
-              🔍
+            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-[#9e7272]">
+              <FontAwesomeIcon icon={faSearch} />
             </span>
             <input
               type="text"
@@ -62,12 +70,12 @@ const AdminOrdersPage = () => {
               label: s === "all" ? "All Statuses" : STATUS_LABELS[s],
               icon:
                 s === "all"
-                  ? "📋"
+                  ? faClipboardList
                   : s === ORDER_STATUS.DELIVERED
-                  ? "✅"
+                  ? faCheck
                   : s === ORDER_STATUS.CANCELLED
-                  ? "❌"
-                  : "⏳",
+                  ? faTimesCircle
+                  : faClock,
             }))}
           />
         </div>
@@ -76,7 +84,7 @@ const AdminOrdersPage = () => {
       {/* Table */}
       {filtered.length === 0 ? (
         <EmptyState
-          icon="🔍"
+          icon={faSearch}
           title="No orders found"
           description="Try adjusting your search or filter"
           action={

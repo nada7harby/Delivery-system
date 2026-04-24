@@ -1,3 +1,4 @@
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import clsx from "clsx";
 import {
   STATUS_LABELS,
@@ -10,14 +11,14 @@ const Badge = ({ status, label, icon, className = "", dot = false }) => {
   if (status) {
     const statusClass = STATUS_COLORS[status] || "status-pending";
     const statusLabel = STATUS_LABELS[status] || status;
-    const statusIcon = STATUS_ICONS[status] || "•";
+    const statusIcon = STATUS_ICONS[status];
 
     return (
       <span className={clsx("status-badge", statusClass, className)}>
         {dot ? (
           <span className="w-1.5 h-1.5 rounded-full bg-current" />
         ) : (
-          <span>{statusIcon}</span>
+          <span><FontAwesomeIcon icon={statusIcon} className="text-[10px]" /></span>
         )}
         {statusLabel}
       </span>
@@ -32,7 +33,7 @@ const Badge = ({ status, label, icon, className = "", dot = false }) => {
         className
       )}
     >
-      {icon && <span>{icon}</span>}
+      {icon && <FontAwesomeIcon icon={icon} className="text-[10px]" />}
       {label}
     </span>
   );

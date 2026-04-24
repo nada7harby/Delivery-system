@@ -2,6 +2,20 @@ import { useState } from "react";
 import { useOrderStore, useAppStore, useDriverStore } from "@/store";
 import { DashboardLayout } from "@/layouts";
 import { Card, Badge, Button, Modal, EmptyState } from "@/components";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+  faMotorcycle,
+  faSyncAlt,
+  faSearch,
+  faEye,
+  faTrash,
+  faStar,
+  faPhone,
+  faCar,
+  faClipboardList,
+  faCheck,
+  faPlus,
+} from "@/utils/icons";
 import clsx from "clsx";
 
 const VEHICLE_TYPES = ["Motorcycle", "Bicycle", "Car", "Scooter"];
@@ -56,7 +70,7 @@ const StarRating = ({ rating }) => (
             : "text-gray-300 dark:text-gray-600"
         }`}
       >
-        ★
+        <FontAwesomeIcon icon={faStar} />
       </span>
     ))}
     <span className="ml-1 text-xs text-[#6b4040] dark:text-[#c9a97a]">
@@ -126,7 +140,7 @@ const AddDriverModal = ({ isOpen, onClose, onAdd }) => {
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title="Add New Driver 🚴"
+      title="Add New Driver"
       footer={
         <>
           <Button variant="ghost" onClick={onClose}>
@@ -194,10 +208,10 @@ const DriverDetailModal = ({ driver, orders, onClose }) => {
             {driver.name}
           </p>
           <p className="text-sm text-[#6b4040] dark:text-[#c9a97a]">
-            📱 {driver.phone}
+            <FontAwesomeIcon icon={faPhone} className="text-[10px] mr-1" /> {driver.phone}
           </p>
           <p className="text-sm text-[#6b4040] dark:text-[#c9a97a]">
-            🚗 {driver.vehicleType} · {driver.licensePlate}
+            <FontAwesomeIcon icon={faCar} className="text-[10px] mr-1" /> {driver.vehicleType} · {driver.licensePlate}
           </p>
           <div className="mt-1">
             <StarRating rating={driver.rating} />
@@ -208,15 +222,15 @@ const DriverDetailModal = ({ driver, orders, onClose }) => {
       {/* Stats */}
       <div className="grid grid-cols-3 gap-3 mb-4">
         {[
-          { label: "Total Trips", value: driver.deliveries || 0, icon: "🛵" },
-          { label: "Delivered", value: delivered, icon: "✅" },
-          { label: "Active Now", value: activeOrders.length, icon: "🔄" },
+          { label: "Total Trips", value: driver.deliveries || 0, icon: faMotorcycle },
+          { label: "Delivered", value: delivered, icon: faCheck },
+          { label: "Active Now", value: activeOrders.length, icon: faSyncAlt },
         ].map((s) => (
           <div
             key={s.label}
             className="text-center p-3 bg-[#f8f8f8] dark:bg-[#430000] rounded-xl"
           >
-            <div className="text-xl">{s.icon}</div>
+            <div className="text-xl"><FontAwesomeIcon icon={s.icon} /></div>
             <div className="text-xl font-black text-[#1a0a0a] dark:text-[#f8f8f8]">
               {s.value}
             </div>
@@ -380,14 +394,14 @@ const AdminDriversPage = () => {
       <div className="mb-6 flex items-center justify-between flex-wrap gap-3">
         <div>
           <h1 className="font-display text-2xl font-bold text-[#1a0a0a] dark:text-[#f8f8f8]">
-            Drivers Management 🚴
+            Drivers Management <FontAwesomeIcon icon={faMotorcycle} className="text-primary" />
           </h1>
           <p className="text-[#6b4040] dark:text-[#c9a97a] mt-0.5 text-sm">
             {filtered.length} of {drivers.length} drivers
           </p>
         </div>
-        <Button variant="primary" onClick={() => setShowAdd(true)}>
-          + Add Driver
+        <Button variant="primary" onClick={() => setShowAdd(true)} icon={<FontAwesomeIcon icon={faPlus} className="text-xs" />}>
+          Add Driver
         </Button>
       </div>
 
@@ -396,7 +410,7 @@ const AdminDriversPage = () => {
         <div className="flex flex-col sm:flex-row gap-3">
           <div className="relative flex-1">
             <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm">
-              🔍
+              <FontAwesomeIcon icon={faSearch} className="text-sm" />
             </span>
             <input
               type="text"
@@ -423,7 +437,7 @@ const AdminDriversPage = () => {
       {/* Drivers grid */}
       {filtered.length === 0 ? (
         <EmptyState
-          icon="🚴"
+          icon={faMotorcycle}
           title="No drivers found"
           description="Try adjusting your search or add a new driver"
           action={
@@ -475,7 +489,7 @@ const AdminDriversPage = () => {
                       {driver.name}
                     </p>
                     <p className="text-xs text-[#6b4040] dark:text-[#c9a97a]">
-                      📱 {driver.phone}
+                      <FontAwesomeIcon icon={faPhone} className="text-[10px] mr-1" /> {driver.phone}
                     </p>
                     <div className="mt-1">
                       <StatusDot
@@ -495,7 +509,7 @@ const AdminDriversPage = () => {
                 {/* Info row */}
                 <div className="flex items-center justify-between text-xs text-[#6b4040] dark:text-[#c9a97a] mb-4">
                   <span>{driver.vehicleType}</span>
-                  <span>📦 {totalOrders} trips</span>
+                  <span><FontAwesomeIcon icon={faClipboardList} className="text-[10px] mr-1" /> {totalOrders} trips</span>
                   <StarRating rating={driver.rating} />
                 </div>
 
@@ -515,7 +529,7 @@ const AdminDriversPage = () => {
                     className="flex-1"
                     onClick={() => setDetailDriver(driver)}
                   >
-                    👁 View
+                    <FontAwesomeIcon icon={faEye} className="text-xs" /> View
                   </Button>
                   <Button
                     variant={driver.blocked ? "secondary" : "ghost"}
@@ -530,7 +544,7 @@ const AdminDriversPage = () => {
                     size="sm"
                     onClick={() => setConfirmRemove(driver)}
                   >
-                    🗑
+                    <FontAwesomeIcon icon={faTrash} className="text-xs text-red-500" />
                   </Button>
                 </div>
               </Card>

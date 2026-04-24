@@ -1,4 +1,11 @@
 import React from "react";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+  faUtensils,
+  faMotorcycle,
+  faHome,
+  faMapMarkerAlt,
+} from "@/utils/icons";
 import clsx from "clsx";
 
 const GRID_SIZE = 12;
@@ -104,7 +111,7 @@ const MapSimulation = ({
           style={{ left: `${restaurantPos.x}%`, top: `${restaurantPos.y}%` }}
         >
           <div className="w-9 h-9 bg-amber-500 rounded-xl flex items-center justify-center shadow-lg text-lg border-2 border-white">
-            🍽️
+            <FontAwesomeIcon icon={faUtensils} className="text-white" />
           </div>
           <span className="text-white text-[9px] font-bold mt-0.5 bg-black/50 px-1 rounded">
             Restaurant
@@ -121,7 +128,7 @@ const MapSimulation = ({
           <div className="relative">
             <div className="absolute inset-0 bg-primary/30 rounded-full animate-ping-slow" />
             <div className="w-10 h-10 bg-primary rounded-full flex items-center justify-center shadow-glow text-lg border-2 border-white relative z-10">
-              🛵
+              <FontAwesomeIcon icon={faMotorcycle} className="text-white" />
             </div>
           </div>
           <span className="text-white text-[9px] font-bold mt-0.5 bg-primary/80 px-1 rounded">
@@ -137,7 +144,7 @@ const MapSimulation = ({
           style={{ left: `${customerPos.x}%`, top: `${customerPos.y}%` }}
         >
           <div className="w-9 h-9 bg-emerald-500 rounded-xl flex items-center justify-center shadow-lg text-lg border-2 border-white">
-            🏠
+            <FontAwesomeIcon icon={faHome} className="text-white" />
           </div>
           <span className="text-white text-[9px] font-bold mt-0.5 bg-black/50 px-1 rounded">
             You
@@ -149,15 +156,15 @@ const MapSimulation = ({
       <div className="absolute bottom-2 left-2 bg-black/60 backdrop-blur-sm rounded-lg px-2 py-1.5 z-30">
         <div className="flex flex-col gap-0.5">
           <div className="flex items-center gap-1.5 text-white text-[10px]">
-            <span>🛵</span>
+            <span><FontAwesomeIcon icon={faMotorcycle} className="text-primary" /></span>
             <span>Driver</span>
           </div>
           <div className="flex items-center gap-1.5 text-white text-[10px]">
-            <span>🏠</span>
+            <span><FontAwesomeIcon icon={faHome} className="text-emerald-500" /></span>
             <span>Destination</span>
           </div>
           <div className="flex items-center gap-1.5 text-white text-[10px]">
-            <span>🍽️</span>
+            <span><FontAwesomeIcon icon={faUtensils} className="text-amber-500" /></span>
             <span>Restaurant</span>
           </div>
         </div>
@@ -165,7 +172,7 @@ const MapSimulation = ({
 
       {/* Simulated map label */}
       <div className="absolute top-2 right-2 bg-black/50 text-white text-[9px] px-2 py-1 rounded-md z-30">
-        📍 Live Simulation
+        <FontAwesomeIcon icon={faMapMarkerAlt} className="mr-1" /> Live Simulation
       </div>
     </div>
   );

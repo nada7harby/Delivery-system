@@ -966,6 +966,8 @@ const useOrderStore = create(
             notes: "No onions please",
             createdAt: new Date(Date.now() - 3600000 * 24).toISOString(),
             updatedAt: new Date(Date.now() - 3600000 * 22).toISOString(),
+            pickupLocation: { lat: 40.7128, lng: -74.006, name: "Restaurant HQ" },
+            deliveryLocation: { lat: 40.7306, lng: -73.9352, address: "123 Main St, Springfield" },
             driverId: "d1",
             assignedAt: new Date(Date.now() - 3600000 * 23.8).toISOString(),
             expectedDeliveryTime: new Date(
@@ -988,6 +990,7 @@ const useOrderStore = create(
               rating: 4.9,
               vehicleType: "Motorcycle",
               phone: "+20 123-456-7890",
+              currentLocation: { lat: 40.7306, lng: -73.9352 }
             },
             autoAssigned: true,
             assignmentScore: -0.72,
@@ -1040,6 +1043,8 @@ const useOrderStore = create(
             notes: "",
             createdAt: new Date(Date.now() - 1800000).toISOString(),
             updatedAt: new Date(Date.now() - 600000).toISOString(),
+            pickupLocation: { lat: 40.7128, lng: -74.006, name: "Restaurant HQ" },
+            deliveryLocation: { lat: 40.7228, lng: -74.016, address: "456 Oak Ave, Springfield" },
             driverId: "d2",
             assignedAt: new Date(Date.now() - 1500000).toISOString(),
             expectedDeliveryTime: new Date(Date.now() - 300000).toISOString(),
@@ -1056,6 +1061,7 @@ const useOrderStore = create(
               rating: 4.6,
               vehicleType: "Bicycle",
               phone: "+1 555-0104",
+              currentLocation: { lat: 40.7188, lng: -74.01 }
             },
             autoAssigned: true,
             assignmentScore: -0.64,

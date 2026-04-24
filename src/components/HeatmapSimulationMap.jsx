@@ -1,4 +1,6 @@
 import { useMemo } from "react";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faMotorcycle } from "@/utils/icons";
 import clsx from "clsx";
 
 const normalize = (lat, lng, bounds) => {
@@ -138,7 +140,7 @@ const HeatmapSimulationMap = ({
               style={{ left: `${position.x}%`, top: `${position.y}%` }}
             >
               <span className="inline-flex h-9 w-9 items-center justify-center rounded-full border-2 border-white bg-emerald-500 text-sm shadow-xl">
-                🛵
+                <FontAwesomeIcon icon={faMotorcycle} className="text-white" />
               </span>
             </div>
           );

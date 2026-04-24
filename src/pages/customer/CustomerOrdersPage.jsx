@@ -1,13 +1,15 @@
 import { useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { motion as Motion } from "framer-motion";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
-  ArrowUpRight,
-  PackageSearch,
-  Repeat2,
-  ShoppingBag,
-  Sparkles,
-} from "lucide-react";
+  faExternalLinkAlt,
+  faSearch,
+  faRedo,
+  faShoppingBag,
+  faStar,
+  faUtensils,
+} from "@/utils/icons";
 import {
   useOrderStore,
   useAuthStore,
@@ -61,7 +63,7 @@ const OrderCard = ({ order }) => {
       >
         <div className="flex flex-col sm:flex-row gap-4">
           <div className="hidden sm:flex w-14 h-14 rounded-2xl bg-gradient-to-br from-[#ff8e42] to-[#f2552c] items-center justify-center text-white">
-            <ShoppingBag size={22} />
+            <FontAwesomeIcon icon={faShoppingBag} className="text-2xl" />
           </div>
 
           <div className="flex-1 min-w-0">
@@ -120,7 +122,7 @@ const OrderCard = ({ order }) => {
                 onClick={() => navigate(`/order/${order.id}`)}
               >
                 <span className="inline-flex items-center gap-1">
-                  Track <ArrowUpRight size={14} />
+                  Track <FontAwesomeIcon icon={faExternalLinkAlt} className="text-xs" />
                 </span>
               </Button>
               <Button
@@ -130,7 +132,7 @@ const OrderCard = ({ order }) => {
                 onClick={handleReorder}
               >
                 <span className="inline-flex items-center gap-1">
-                  Reorder <Repeat2 size={14} />
+                  Reorder <FontAwesomeIcon icon={faRedo} className="text-xs" />
                 </span>
               </Button>
             </div>
@@ -169,7 +171,7 @@ const CustomerOrdersPage = () => {
           className="rounded-[2rem] p-6 bg-gradient-to-r from-[#102a36] via-[#154457] to-[#1e5f78] text-white shadow-2xl"
         >
           <p className="text-xs uppercase tracking-[0.24em] text-white/70 inline-flex items-center gap-2">
-            <Sparkles size={13} /> Customer Portal
+            <FontAwesomeIcon icon={faStar} className="text-xs" /> Customer Portal
           </p>
           <h1 className="font-display text-3xl font-black mt-2">
             Order Command Center
@@ -203,7 +205,7 @@ const CustomerOrdersPage = () => {
         <div className="mt-6">
           {orders.length === 0 ? (
             <EmptyState
-              icon="🍽️"
+              icon={faUtensils}
               title={
                 allOrders.length === 0
                   ? "No orders yet"
@@ -238,7 +240,7 @@ const CustomerOrdersPage = () => {
 
         {allOrders.length > 0 && (
           <div className="mt-8 rounded-2xl border border-dashed border-[#bcd0da] dark:border-[#35525f] p-4 flex items-center gap-3 text-sm text-[#426170] dark:text-[#9fb9c6]">
-            <PackageSearch size={16} />
+            <FontAwesomeIcon icon={faSearch} className="text-sm" />
             Orders update in real time. Open any card to view live tracking and
             timeline events.
           </div>

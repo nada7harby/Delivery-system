@@ -8,19 +8,19 @@ import {
 } from "@/store";
 import { motion as Motion } from "framer-motion";
 import clsx from "clsx";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
-  Bell,
-  Heart,
-  House,
-  LogOut,
-  MapPinned,
-  Moon,
-  Package,
-  Settings,
-  ShoppingBag,
-  ShoppingCart,
-  Sun,
-} from "lucide-react";
+  faBell,
+  faHeart,
+  faHome,
+  faSignOutAlt,
+  faMapPinned,
+  faMoon,
+  faPackage,
+  faSettings,
+  faShoppingCart,
+  faSun,
+} from "@/utils/icons";
 
 const CustomerNav = () => {
   const navigate = useNavigate();
@@ -34,14 +34,13 @@ const CustomerNav = () => {
   const cartCount = getItemCount();
 
   const navLinks = [
-    { to: "/", label: "Restaurants", icon: House },
-    { to: "/menu", label: "Browse Menu", icon: ShoppingBag },
-    { to: "/orders", label: "My Orders", icon: Package },
-    { to: "/profile", label: "Profile", icon: Settings },
+    { to: "/", label: "Restaurants", icon: faHome },
+    { to: "/orders", label: "My Orders", icon: faPackage },
+    { to: "/profile", label: "Profile", icon: faSettings },
     {
       to: "/wishlist",
       label: "Favorites",
-      icon: Heart,
+      icon: faHeart,
       badge: wishlistItems.length,
     },
   ];
@@ -99,7 +98,7 @@ const CustomerNav = () => {
                   : "text-[#3d5969] dark:text-[#bdd5e0] hover:bg-[#eef4f7] dark:hover:bg-[#264551]",
               )}
             >
-              <link.icon size={14} />
+              <FontAwesomeIcon icon={link.icon} className="text-xs" />
               {link.label}
               {link.badge > 0 && (
                 <span className="absolute -top-1 -right-1 w-4 h-4 bg-[#ff3b30] text-white text-[9px] font-bold rounded-full flex items-center justify-center border border-white">
@@ -118,7 +117,11 @@ const CustomerNav = () => {
             onClick={toggleDarkMode}
             className="w-9 h-9 flex items-center justify-center rounded-xl text-[#3d5969] dark:text-[#bdd5e0] hover:bg-[#edf4f8] dark:hover:bg-[#264551] transition-colors"
           >
-            {isDarkMode ? <Sun size={16} /> : <Moon size={16} />}
+            {isDarkMode ? (
+              <FontAwesomeIcon icon={faSun} className="text-sm" />
+            ) : (
+              <FontAwesomeIcon icon={faMoon} className="text-sm" />
+            )}
           </Motion.button>
 
           {/* Cart */}
@@ -126,7 +129,7 @@ const CustomerNav = () => {
             to="/cart"
             className="relative w-9 h-9 flex items-center justify-center rounded-xl text-[#3d5969] dark:text-[#bdd5e0] hover:bg-[#edf4f8] dark:hover:bg-[#264551] transition-colors"
           >
-            <ShoppingCart size={17} />
+            <FontAwesomeIcon icon={faShoppingCart} className="text-base" />
             {cartCount > 0 && (
               <span className="absolute -top-1 -right-1 w-5 h-5 bg-[#f2552c] text-white text-[10px] font-bold rounded-full flex items-center justify-center animate-bounce">
                 {cartCount}
@@ -136,7 +139,7 @@ const CustomerNav = () => {
 
           {/* Notifications */}
           <button className="relative w-9 h-9 flex items-center justify-center rounded-xl text-[#3d5969] dark:text-[#bdd5e0] hover:bg-[#edf4f8] dark:hover:bg-[#264551] transition-colors">
-            <Bell size={17} />
+            <FontAwesomeIcon icon={faBell} className="text-base" />
             {unreadCount > 0 && (
               <span className="absolute -top-1 -right-1 w-4 h-4 bg-[#ff3b30] text-white text-[9px] font-bold rounded-full flex items-center justify-center">
                 {unreadCount}
@@ -161,7 +164,7 @@ const CustomerNav = () => {
               onClick={handleLogout}
               className="text-xs px-2 py-1 rounded-lg text-[#3d5969] dark:text-[#bdd5e0] hover:bg-[#edf4f8] dark:hover:bg-[#264551] transition-colors"
             >
-              <LogOut size={14} />
+              <FontAwesomeIcon icon={faSignOutAlt} className="text-xs" />
             </button>
           </div>
         </div>
@@ -180,7 +183,7 @@ const CustomerNav = () => {
                 : "text-[#3d5969] dark:text-[#bdd5e0] hover:bg-[#edf4f8] dark:hover:bg-[#264551]",
             )}
           >
-            <link.icon size={13} />
+            <FontAwesomeIcon icon={link.icon} className="text-xs" />
             <span className="truncate">{link.label}</span>
             {link.badge > 0 && (
               <span className="absolute -top-1 right-1 w-4 h-4 bg-[#ff3b30] text-white text-[9px] font-bold rounded-full flex items-center justify-center border border-white">
@@ -196,7 +199,7 @@ const CustomerNav = () => {
           to="/orders"
           className="w-12 h-12 rounded-2xl bg-gradient-to-r from-[#19a9bf] to-[#0c8fa5] text-white shadow-2xl flex items-center justify-center"
         >
-          <MapPinned size={18} />
+          <FontAwesomeIcon icon={faMapPinned} className="text-lg" />
         </Link>
       </div>
     </header>

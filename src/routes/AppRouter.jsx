@@ -2,6 +2,8 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { useEffect } from "react";
 
 import { useAuthStore, useAppStore, useTrackingStore } from "@/store";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faMotorcycle } from "@/utils/icons";
 import ProtectedRoute from "./ProtectedRoute";
 import { ToastContainer } from "@/components";
 import { socket } from "@/services";
@@ -40,21 +42,25 @@ import AdminRestaurantFormPage from "@/pages/admin/AdminRestaurantFormPage";
 import AdminRestaurantMenuPage from "@/pages/admin/AdminRestaurantMenuPage";
 
 // 404
-const NotFoundPage = () => (
-  <div className="min-h-screen flex flex-col items-center justify-center bg-[#f8f8f8] dark:bg-[#0f0505]">
-    <div className="text-8xl mb-4 animate-bounce">🛵</div>
-    <h1 className="font-display text-4xl font-black text-gradient mb-2">404</h1>
-    <p className="text-[#6b4040] dark:text-[#c9a97a] mb-6">
-      This page doesn't exist!
-    </p>
-    <a
-      href="/"
-      className="btn-primary text-sm px-5 py-2.5 rounded-xl font-semibold text-white bg-primary hover:bg-primary-light"
-    >
-      Go Home
-    </a>
-  </div>
-);
+const NotFoundPage = () => {
+  return (
+    <div className="min-h-screen flex flex-col items-center justify-center bg-[#f8f8f8] dark:bg-[#0f0505]">
+      <div className="text-8xl mb-4 animate-bounce text-primary/20">
+        <FontAwesomeIcon icon={faMotorcycle} />
+      </div>
+      <h1 className="font-display text-4xl font-black text-gradient mb-2">404</h1>
+      <p className="text-[#6b4040] dark:text-[#c9a97a] mb-6">
+        This page doesn't exist!
+      </p>
+      <a
+        href="/"
+        className="btn-primary text-sm px-5 py-2.5 rounded-xl font-semibold text-white bg-primary hover:bg-primary-light"
+      >
+        Go Home
+      </a>
+    </div>
+  );
+};
 
 const AppRouter = () => {
   const { isAuthenticated, user } = useAuthStore();

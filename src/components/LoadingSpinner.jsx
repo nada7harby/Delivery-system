@@ -1,3 +1,6 @@
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faMotorcycle } from "@/utils/icons";
+
 const LoadingSpinner = ({ size = "md", text = "" }) => {
   const sizes = {
     sm: "w-4 h-4 border-2",
@@ -23,7 +26,7 @@ const LoadingSpinner = ({ size = "md", text = "" }) => {
 export const PageLoader = () => (
   <div className="min-h-screen flex items-center justify-center bg-surface dark:bg-[#0f0505]">
     <div className="flex flex-col items-center gap-4">
-      <div className="text-5xl animate-bounce">🛵</div>
+      <div className="text-5xl animate-bounce text-primary"><FontAwesomeIcon icon={faMotorcycle} /></div>
       <LoadingSpinner size="lg" text="Loading..." />
     </div>
   </div>

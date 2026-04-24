@@ -1,11 +1,26 @@
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useAuthStore, useAppStore } from "@/store";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+  faChartBar,
+  faClipboardList,
+  faDollarSign,
+  faBuilding,
+  faSatellite,
+  faFire,
+  faMotorcycle,
+  faUsers,
+  faChevronLeft,
+  faChevronRight,
+  faSun,
+  faMoon,
+} from "@/utils/icons";
 import clsx from "clsx";
 
 const DRIVER_NAV = [
-  { to: "/driver", label: "Dashboard", icon: "📊", exact: true },
-  { to: "/driver/orders", label: "My Orders", icon: "📋" },
-  { to: "/driver/earnings", label: "Earnings", icon: "💰" },
+  { to: "/driver", label: "Dashboard", icon: faChartBar, exact: true },
+  { to: "/driver/orders", label: "My Orders", icon: faClipboardList },
+  { to: "/driver/earnings", label: "Earnings", icon: faDollarSign },
 ];
 
 const DashboardLayout = ({ children, role = "driver" }) => {
@@ -20,13 +35,13 @@ const DashboardLayout = ({ children, role = "driver" }) => {
   } = useAppStore();
 
   const adminNav = [
-    { to: "/admin", label: "Dashboard", icon: "📊", exact: true },
-    { to: "/admin/restaurants", label: "Restaurants", icon: "🏪" },
-    { to: "/admin/live-tracking", label: "Live Tracking", icon: "🛰️" },
-    { to: "/admin/heatmap", label: "Heatmap", icon: "🔥" },
-    { to: "/admin/orders", label: "All Orders", icon: "📋" },
-    { to: "/admin/drivers", label: "Drivers", icon: "🚴" },
-    { to: "/admin/customers", label: "Customers", icon: "👥" },
+    { to: "/admin", label: "Dashboard", icon: faChartBar, exact: true },
+    { to: "/admin/restaurants", label: "Restaurants", icon: faBuilding },
+    { to: "/admin/live-tracking", label: "Live Tracking", icon: faSatellite },
+    { to: "/admin/heatmap", label: "Heatmap", icon: faFire },
+    { to: "/admin/orders", label: "All Orders", icon: faClipboardList },
+    { to: "/admin/drivers", label: "Drivers", icon: faMotorcycle },
+    { to: "/admin/customers", label: "Customers", icon: faUsers },
   ];
 
   const nav = role === "admin" ? adminNav : DRIVER_NAV;
@@ -79,7 +94,7 @@ const DashboardLayout = ({ children, role = "driver" }) => {
               )}
               title={!sidebarOpen ? link.label : undefined}
             >
-              <span className="text-lg flex-shrink-0">{link.icon}</span>
+              <span className="text-lg flex-shrink-0"><FontAwesomeIcon icon={link.icon} /></span>
               {sidebarOpen && <span className="truncate">{link.label}</span>}
             </Link>
           ))}
@@ -131,7 +146,7 @@ const DashboardLayout = ({ children, role = "driver" }) => {
             onClick={toggleSidebar}
             className="w-8 h-8 flex items-center justify-center rounded-lg text-[#6b4040] dark:text-[#c9a97a] hover:bg-[#E5D0AC]/50 dark:hover:bg-[#3d1a1a]/50 transition-colors"
           >
-            {sidebarOpen ? "◀" : "▶"}
+            <FontAwesomeIcon icon={sidebarOpen ? faChevronLeft : faChevronRight} />
           </button>
 
           <div className="flex items-center gap-2">
@@ -139,7 +154,7 @@ const DashboardLayout = ({ children, role = "driver" }) => {
               onClick={toggleDarkMode}
               className="w-9 h-9 flex items-center justify-center rounded-lg text-[#6b4040] dark:text-[#c9a97a] hover:bg-[#E5D0AC]/50 dark:hover:bg-[#3d1a1a]/50 transition-colors"
             >
-              {isDarkMode ? "☀️" : "🌙"}
+              <FontAwesomeIcon icon={isDarkMode ? faSun : faMoon} />
             </button>
             <span className="text-sm text-[#6b4040] dark:text-[#c9a97a] hidden sm:block capitalize">
               {role === "admin" ? "Admin Panel" : "Driver Dashboard"}
