@@ -98,7 +98,7 @@ const StatusBanner = ({ status, eta, restaurantName }) => {
               <p className="text-white/70 text-sm mt-1">from {restaurantName}</p>
             )}
           </div>
-          <div className="text-4xl">{STATUS_ICONS[status]}</div>
+          <div className="text-4xl"><FontAwesomeIcon icon={STATUS_ICONS[status]} /></div>
         </div>
         {eta !== null && isLive && (
           <div className="mt-4 inline-flex items-center gap-2 bg-white/20 backdrop-blur-sm px-4 py-2 rounded-full text-sm font-bold">
